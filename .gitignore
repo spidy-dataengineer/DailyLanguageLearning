@@ -1,0 +1,8 @@
+.venv/
+.idea/
+*.iml
+__pycache__/
+*.pyc
+.env
+en_items.json
+zh_items.json
