@@ -46,25 +46,28 @@
 - docs: 신규 `docs/review.md`(스킴·간격·Recall·모드·핑) + `notion.md`(속성4)·`CLAUDE.md`(Layout+CLI)·`overview.md`(pipeline+로드맵)·`generation.md` 갱신.
 - **검증**: `migrate` 1회 → `review` 실행 시 due 행에 Box/Next review 채워지고 스포일러 핑 도착; 한 행 `Recall=Got it` 후 재실행 → 박스↑·간격 점프·Recall 클리어.
 
-## Increment 2 — 발음 오디오 (중국어 우선, 링크 방식)
-- **결정**: 무인 클라우드엔 파일업로드(3콜+1시간 만료) 대신 **YouGlish 링크**(네트워크·키·호스팅 0). `youglish_url(expr,lang)` = `https://youglish.com/pronounce/{quote(expr)}/{chinese|english}`.
-- `_properties()`: `lang=="zh"`면 `Audio`(기존 속성)에 링크 세팅. `_page_body()`: ZH일 때 🔊 발음 듣기 링크 문단 1개 추가(기존 🔗 링크 패턴 재사용).
-- 스키마 변경 없음(Audio 재사용). 기존 행 백필 선택(미실시 권장, 신규부터). EN 오디오는 후속(한 줄 게이트).
+## Increment 2 — 발음 오디오 (중국어 우선, 인라인 네이티브 + 폴백) ✅ 출시
+- **결정 진화**: 처음엔 YouGlish 링크만(키·호스팅 0). 사용자 피드백("원어민 실제 발음 + 카드 안 임베드, 매번 클릭은 번거로움")으로 **인라인 네이티브 오디오**로 전환. 파일 업로드/edge-tts(보류) 대신 **CDN 호스팅 네이티브 녹음**이라는 제3의 길: `audio-cmn`(hugolpz, CC BY-SA) mp3를 jsDelivr로 직접 임베드 — 네트워크만 쓰고 키·호스팅·업로드 0, URL 영구.
+- **3단 리졸버 `native_audio_url(expr, pinyin)`**:
+  1. `zh_audio_url(word)`(lru_cache): `.../audio-cmn@master/64k/hsk/cmn-{quote(word)}.mp3` HEAD → 200이면 URL, 아니면(403/404/네트워크) None. 한자 **퍼센트 인코딩 필수**. 단일 HSK어 ~80%.
+  2. `_commons_audio_url(word, pinyin)`(lru_cache): Wikimedia Commons 검색 API(`User-Agent` 필수)로 오디오 파일 찾고, **파일명 병음을 카드 병음과 대조(`_pinyin_matches`)해 일치할 때만** 채택 → 엉뚱한 발음 방지. 병음 없으면 스킵(안전). audio-cmn이 놓친 흔한 단어(예 `你好`) 일부를 ogg로 채움. Wikimedia 핫링크 비권장이라 폴백 한정.
+- `_properties()`(ZH): `Audio` = `native_audio_url(...)` `or` YouGlish. `_page_body()`(ZH): 네이티브 있으면 **오디오 블록**(`{"type":"audio","audio":{"type":"external",...}}`, 인라인 재생) + 출처 링크(`_audio_credit`가 URL로 audio-cmn/Commons 구분, CC BY-SA 표기), 없으면 🔊 발음 듣기 YouGlish 링크 폴백. 성어·구·드문 단어는 네이티브 녹음 부재 → YouGlish行.
+- 스키마 변경 없음(`Audio` url 재사용). 기존 행 백필 미실시(신규부터). EN 오디오는 후속(한 줄 게이트).
 - docs: `notion.md`·`generation.md`·`overview.md` 갱신.
-- **검증**: ZH 카드의 `Audio` URL이 YouGlish 중국어 페이지로 열리고 본문에 🔊 링크.
+- **검증 완료**: 커버 단어(`学习`)는 `Audio` 속성=mp3 + 본문 audio 블록 인라인 재생; 미커버(`你好`)는 YouGlish 폴백. 오프라인 단위검증 + 라이브 카드 생성/되읽기 통과.
 
-## Increment 3 — 능동 회상(cloze) + 역방향 카드 (스키마·행 추가 0, 렌더링만)
-- `cloze(example, expression)`: 예문 내 표현(+구두점 변형)을 대소문자 무시로 `____` 치환, 못 찾으면 원문 유지(fail-soft).
-- `_page_body()`: 💬 콜아웃은 **cloze 버전** 표시, 전체 예문은 `👀 뜻 보기` 토글 안으로. + **두 번째 토글** `🔄 거꾸로 (뜻→표현)`(뜻 보이고 표현 숨김). 기존 토글 패턴 재사용 — 행/스키마 추가 없음.
-- `routine_prompt.md`: "예문에 표현을 **그대로(verbatim)** 포함"으로 강화(cloze가 의존). 새 필드 없음.
-- 기존 24개 본문은 재생성 안 함(신규부터 적용). docs: `notion.md`·`generation.md` 갱신.
-- **검증**: 표현 포함 예문 → 💬에 `____`, 토글에 뜻+전체예문, 🔄 역방향; 변형 예문은 fail-soft.
+## Increment 3 — 능동 회상(cloze) + 역방향 카드 (스키마·행 추가 0, 렌더링만) ✅ 출시
+- `cloze(example, expression)`: 표현을 `re.subn`(escape, `IGNORECASE`)로 `____` 치환, 못 찾으면 원문 유지(fail-soft). 부분문자열이라 인접 구두점은 자연 흡수.
+- `_page_body()`: `_toggle()` 헬퍼 신설(2회 사용). 💬 콜아웃 = cloze 버전; `👀 뜻 보기` 토글 = 뜻 + (치환 성공 시) 전체 예문 + 번역; **두 번째 토글 `🔄 거꾸로 (뜻→표현): {뜻}`** = 라벨에 뜻 노출, 안에 표현 숨김. 행/스키마 추가 없음.
+- `routine_prompt.md`: 예문에 표현을 **verbatim 포함** 요구로 강화(cloze 의존). 새 필드 없음.
+- 기존 본문 재생성 안 함(신규부터). docs: `notion.md`·`generation.md` 갱신.
+- **검증 완료**: 오프라인 단위(cloze EN/ZH/대소문자/fail-soft, 레이아웃) + 라이브 EN 카드(💬 `____`, 👀 토글에 뜻+전체예문+번역, 🔄 라벨=뜻·내부=표현) 통과.
 
-## Increment 4 — 통계 (읽기 전용 집계, 1에 의존)
-- 새 모드 `stats`(또는 review 핑 푸터): `compute_stats()` = 총 학습수(`existing_rows`), due 수(`due_rows`, ←inc1), HSK 레벨 분포(`_select_name`), **streak**(카드 `Date` 집합에서 오늘부터 역산), 박스 분포(←inc1). 모두 기존 데이터 파생 — **대시보드 DB·상태필드 없음**.
-- 전달: review 핑 푸터에 3줄 합침(권장) + 온디맨드 `stats` 모드.
-- docs: 신규 `docs/stats.md` + `CLAUDE.md`(Layout+CLI)·`overview.md` 갱신.
-- **검증**: `stats` JSON가 Notion 행수·Date 히스토리와 일치, Discord 요약 정상.
+## Increment 4 — 통계 (읽기 전용 집계, 1에 의존) ✅ 출시
+- `compute_stats(notion)`: EN·ZH **vocab 행만**(연습 행 제외) 한 번 스캔 — 총 학습수, due 수(조건은 `due_rows`와 동일·교차검증), 박스 분포, HSK 레벨 분포(ZH), **streak**(카드 `Date`에서 오늘(없으면 어제)부터 역산). 모두 기존 데이터 파생 — **대시보드 DB·상태필드 없음**.
+- 전달: `review` 핑 푸터에 3줄(`_stats_lines`: 누적+streak / 박스 / HSK) 합침 + 온디맨드 `stats` 모드(`stats()` → JSON 출력 + `notify_stats` Discord 요약, Notion 읽기 전용).
+- docs: 신규 `docs/stats.md` + `CLAUDE.md`(Layout+CLI+Status)·`overview.md` 갱신.
+- **검증 완료**: 오프라인 단위(`_streak`·`_stats_lines`) + 라이브(`compute_stats`가 박스합=총계, due=`due_rows` 일치, streak≥0) + `stats` 모드 JSON 출력·Discord 요약 발송 정상.
 
 ---
 

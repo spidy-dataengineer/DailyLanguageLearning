@@ -1,10 +1,12 @@
 # Review (SRS — spaced repetition)
 
+Code: `review.py` (`due_rows`, `reschedule`, `review`). Schema migration in `notion_io.migrate`.
+
 Each saved **vocab** card is reviewed on a forgetting curve. Practice rows (📝) are excluded.
 
 ## Scheme (Leitner, fixed intervals)
-- Boxes 1→5, intervals **1 / 3 / 7 / 16 / 35 days** (`INTERVALS` in `daily_notion.py`).
-- New cards start **box 1**, `Next review = today + 1` (set in `_properties`).
+- Boxes 1→5, intervals **1 / 3 / 7 / 16 / 35 days** (`INTERVALS` in `constants.py`).
+- New cards start **box 1**, `Next review = today + 1` (set in `notion_io._properties`).
 - Feedback = the Notion **`Recall`** select (the ONLY field you touch): `Got it` → box +1 (max 5);
   `Forgot` → reset to box 1. Unrated due cards keep their box and are simply re-scheduled.
 - Due = `Next review` empty **or** `<= today`.
@@ -20,9 +22,10 @@ Usage: open the ping on your phone → recall the meaning → tap the spoiler to
 ## Properties (added by `migrate`)
 `Box`(number) · `Next review`(date) · `Recall`(select: Got it/Forgot) · `Last reviewed`(date).
 - One-time on existing DBs: `python daily_notion.py migrate` (idempotent; `data_sources.update`).
-- Fresh `init` already includes them (`_SRS_PROPS` spread into `_EXPR_SCHEMA_BASE`).
+- Fresh `init` already includes them (`notion_io._SRS_PROPS` spread into `_EXPR_SCHEMA_BASE`).
 
 ## Notes
 - Empty `Box`/`Next review` (pre-SRS rows) count as box 1 / due, so the first `review` lazily backfills them.
 - Discord webhooks are one-way → feedback flows through Notion `Recall`, never Discord.
-- Intervals are fixed Leitner (no SM-2 ease factors) — change `INTERVALS` to retune.
+- Intervals are fixed Leitner (no SM-2 ease factors) — change `INTERVALS` in `constants.py` to retune.
+- The review ping also embeds a stats footer (`stats.compute_stats` → `notify._stats_lines`).

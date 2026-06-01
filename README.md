@@ -28,9 +28,14 @@ Python only does I/O. The routine's own Claude reasoning turns raw material into
 (no separate LLM API key needed). See `routine_prompt.md` for the exact prompt.
 
 ## Files
-- `daily_notion.py` — `init` / `fetch` / `write` (Notion + Discord I/O, dedup).
-- `sources.py` — source fetchers: Merriam-Webster WOTD, BBC 6 Minute English (+transcript),
-  Luke's English Podcast, HSK list, Tatoeba.
+- `daily_notion.py` — thin CLI entry: dispatches `init` / `fetch` / `write` / `review` / `stats` / `migrate` to the concern modules below.
+- `notion_io.py` — Notion API + schema/init/migrate + page (flashcard / practice) layout + ZH audio URLs + fetch + write.
+- `dedup.py` — string-similarity dedup (`similar`, `similar_to_any`) + HSK progression (`hsk_candidates`).
+- `review.py` — SRS (spaced repetition): find due cards, reschedule on the Leitner curve.
+- `stats.py` — read-only learning aggregates (totals / due / box distribution / HSK / streak).
+- `notify.py` — Discord webhook senders (`notify_write` / `notify_review` / `notify_stats`).
+- `sources.py` — source fetchers: Merriam-Webster WOTD, BBC 6 Minute English (+transcript), Luke's English Podcast, HSK list, Tatoeba.
+- `constants.py` — shared constants (`STYLES`, `TARGETS`, `SIM_THRESHOLD`, `INTERVALS`, …).
 - `routine_prompt.md` — the `/schedule` prompt.
 - `requirements.txt`, `.env.example`.
 - `docs/` — design & planning docs (living source of truth); start at [docs/overview.md](docs/overview.md).

@@ -1,5 +1,7 @@
 # Dedup — "skip already-saved or similar"
 
+Code: `dedup.py` (`norm`, `similar`, `similar_to_any`, `hsk_candidates`). The write-time safety net is invoked from `notion_io.write`.
+
 3 layers. **No vector DB needed at current scale.**
 
 1. **String net (Python `similar()`)** — normalize (lowercase, strip punctuation), then match:
@@ -26,4 +28,4 @@ Only once the **English history reaches thousands** (≈1 year at 10/day) and pa
 Simpler interim (no vector DB): pass only **recent N** (e.g. 500) + same category to `avoid`.
 **Decision: add when needed, not before.**
 
-Tuning: `SIM_THRESHOLD` in `daily_notion.py` (lower = stricter / more skips).
+Tuning: `SIM_THRESHOLD` in `constants.py` (lower = stricter / more skips).

@@ -7,7 +7,7 @@ files via USB / personal cloud, and push only from the personal PC.
 ## What moves
 The entire `notion/` folder **except** `.venv/`, `.idea/`, `__pycache__/` (those regenerate). That
 includes all code + every doc:
-- Code: `daily_notion.py`, `sources.py`
+- Code: `daily_notion.py` (CLI), `notion_io.py`, `dedup.py`, `review.py`, `stats.py`, `notify.py`, `sources.py`, `constants.py`
 - Config: `requirements.txt`, `.env.example`, `.gitignore`
 - Docs: `README.md`, `CLAUDE.md`, `routine_prompt.md`, `MIGRATION.md`, `docs/*.md` (overview, sources,
   notion, dedup, generation, deployment, review, **plan**)

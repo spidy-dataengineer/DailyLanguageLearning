@@ -6,3 +6,4 @@ __pycache__/
 .env
 en_items.json
 zh_items.json
+.codegraph/

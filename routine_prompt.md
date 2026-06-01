@@ -82,6 +82,8 @@ Korean phonetic (한글)**, joined by ` · ` — e.g. `ài hào · 아이 하오
 - If a `fetch` returns few candidates (a source was down), still produce the full `target_count`
   from the available material plus your own advanced knowledge, keeping the dedup rule.
 - Keep examples natural and genuinely useful; the Korean gloss/translation should read naturally.
-- The card hides `meaning_ko` + `example_ko` behind a "뜻 보기" toggle (active recall), so `example`
-  must contain the expression in real context and the Korean lines must be accurate.
+- The card shows the `example` with the expression **blanked out** (`____`) for active recall, hides
+  `meaning_ko` + the full `example_ko` behind a "뜻 보기" toggle, and adds a reverse "거꾸로" toggle.
+  So `example` **must contain the `expression` verbatim** (exact same wording, so the blank works) in
+  real context, and the Korean lines must be accurate.
 - Output strict JSON for the two files (no trailing commas, UTF-8, `ensure_ascii` off).

@@ -23,5 +23,5 @@ source never breaks the run.
 
 ## Adding a source
 1. Write a `*_fetch()` in `sources.py` returning a dict/list; wrap the network call in `_get` or a `try/except` so it fails soft.
-2. Add it to the `candidates` dict in `daily_notion.fetch()` (en or zh branch).
+2. Add it to the `candidates` dict in `notion_io.fetch()` (en or zh branch).
 3. Mention it in `routine_prompt.md` so the routine knows to mine it.
