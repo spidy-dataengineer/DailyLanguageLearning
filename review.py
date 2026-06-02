@@ -9,7 +9,7 @@ import sys
 from notion_client import Client
 from notion_client.helpers import collect_paginated_api
 
-from constants import INTERVALS
+from constants import INTERVALS, kst_today
 from notion_io import _client, _due_date, _plain, _select_name, data_source_id
 from notify import notify_review
 from stats import compute_stats
@@ -22,7 +22,7 @@ def _log(msg: str) -> None:
 def due_rows(notion: Client, db_id: str) -> list:
     """Vocab rows due for review (Next review empty or <= today). Skips practice rows."""
     ds = data_source_id(notion, db_id)
-    today = dt.date.today().isoformat()
+    today = kst_today().isoformat()
     out = []
     for r in collect_paginated_api(notion.data_sources.query, data_source_id=ds):
         p = r.get("properties", {})
@@ -40,7 +40,7 @@ def due_rows(notion: Client, db_id: str) -> list:
 
 def reschedule(notion: Client, page_id: str, box: int, recall: str) -> None:
     new_box = min(box + 1, 5) if recall == "Got it" else 1 if recall == "Forgot" else box
-    today = dt.date.today()
+    today = kst_today()
     notion.pages.update(page_id=page_id, properties={
         "Box": {"number": new_box},
         "Next review": {"date": {"start": (today + dt.timedelta(days=INTERVALS[new_box])).isoformat()}},

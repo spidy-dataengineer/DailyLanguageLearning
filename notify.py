@@ -1,11 +1,12 @@
 """Discord webhook notifications — three flavors: daily write summary, review ping, stats."""
 from __future__ import annotations
 
-import datetime as dt
 import os
 import sys
 
 import requests
+
+from constants import kst_today
 
 
 def _log(msg: str) -> None:
@@ -34,7 +35,7 @@ def notify_write(written: dict) -> None:
     if not (written.get("en") or written.get("zh")):
         _log("nothing written; skipping notification")
         return
-    lines = [f"📚 **오늘의 표현** ({dt.date.today().isoformat()})"]
+    lines = [f"📚 **오늘의 표현** ({kst_today().isoformat()})"]
     if written["en"]:
         lines += ["", "🇬🇧 **English**"]
         lines += [f"• **{i.get('expression','')}** — {i.get('meaning_ko','')}" for i in written["en"]]
@@ -59,7 +60,7 @@ def notify_review(due: dict, stats: dict | None = None) -> None:
     if not url or n == 0:
         _log("review: nothing due or no webhook; skipping ping")
         return
-    lines = [f"🧠 **복습 ({dt.date.today().isoformat()}) — {n}개** · 뜻은 ||가림||, 기억했으면 Notion에서 Recall 표시"]
+    lines = [f"🧠 **복습 ({kst_today().isoformat()}) — {n}개** · 뜻은 ||가림||, 기억했으면 Notion에서 Recall 표시"]
     for lang, flag in (("en", "🇬🇧 English"), ("zh", "🇨🇳 中文")):
         if due[lang]:
             lines += ["", f"**{flag}**"]

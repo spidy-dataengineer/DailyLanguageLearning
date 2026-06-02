@@ -42,6 +42,7 @@ def _text(html: str) -> str:
 
 MW_WOTD_RSS = "https://www.merriam-webster.com/wotd/feed/rss2"
 BBC_6MIN_RSS = "https://podcasts.files.bbci.co.uk/p02pc9tn.rss"
+BBC_TEWS_RSS = "https://podcasts.files.bbci.co.uk/p02pc9zn.rss"
 LUKES_RSS = "https://teacherluke.co.uk/feed/"
 
 
@@ -74,6 +75,26 @@ def bbc_six_minute():
         "notes": notes.get_text(" ", strip=True)[:500],
         "transcript_excerpt": transcript[:4000],
     }
+
+
+def bbc_the_english_we_speak():
+    """BBC 'The English We Speak'. Each episode title IS the target idiom/phrase (e.g. 'A hunch');
+    same transcript-page pattern as the 6-minute feed."""
+    feed = feedparser.parse(BBC_TEWS_RSS)
+    if not feed.entries:
+        _log("BBC TEWS: no entries")
+        return None
+    e = feed.entries[0]
+    phrase = e.title.split(":", 1)[-1].strip() if ":" in e.title else e.title
+    notes = BeautifulSoup(getattr(e, "summary", ""), "html.parser")
+    page_url = next((a["href"] for a in notes.find_all("a", href=True)
+                     if "learningenglish" in a["href"]), e.link)
+    transcript = ""
+    r = _get(page_url)
+    if r:
+        transcript = _text(r.text)
+    return {"title": phrase, "url": page_url,
+            "notes": notes.get_text(" ", strip=True)[:500], "transcript_excerpt": transcript[:4000]}
 
 
 def lukes_english():

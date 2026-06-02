@@ -9,12 +9,18 @@ lower anytime. `fetch` over-provides candidates (e.g. ~20 HSK words) so dedup st
 New cards enter the SRS review loop at box 1 — see [review](review.md).
 
 ## Level
-- **English**: TOEIC 900+ / IELTS 8.0+ — idioms, collocations, nuance, low-frequency vocab. Avoid basic words.
+- **English**: practical, **high-frequency everyday expressions** usable in real conversation —
+  ~8 of 10 high-frequency, ~2 may be lower-frequency / more advanced. (The `Level` select stays the
+  fixed label `EN-advanced` — it isn't aggregated in stats for EN, so re-labelling only churns Notion options.)
 - **Chinese**: from **HSK1, in order** (progression tracked via the DB). Beginner-appropriate, short.
 
 ## Style
-Three styles — `everyday` / `business` / `advanced-nuance` — **randomly mixed** across the English
-items and varied day to day. Chinese stays everyday-focused while at beginner level.
+Four styles — `everyday` / `situational` / `idiom` / `business` — spread across the English items
+**weighted toward the everyday end**, varied day to day:
+- `everyday` — casual reactions / discourse / small talk; `situational` — functional phrases tied to a
+  scenario (café, travel, shopping); `idiom` — common idioms/colloquialisms; `business` — workplace/email/meeting.
+
+Chinese stays everyday-focused while at beginner level (no style tag needed).
 
 ## Pronunciation
 - English = **IPA** only (e.g. `/ˈpælətəbl̩/`).
@@ -28,6 +34,8 @@ items and varied day to day. Chinese stays everyday-focused while at beginner le
 ## Sourcing (hybrid)
 Real seed (podcast / dictionary / HSK / Tatoeba / Inbox) → Claude expands. Each card
 records `Source` + `Source URL`. **Inbox items (user-picked IG/YouTube) are used first.**
+BBC **The English We Speak** (`candidates.bbc_phrases`) is an idiom/phrase seed — each episode title
+is itself a real phrase (e.g. "read the room"); its cards record `Source` = `BBC` (shared label).
 
 ## Chinese practice
 Append one `{"type":"practice","sentences":[{zh,pinyin,ko}…]}` (3–4 sentences weaving the day's

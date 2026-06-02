@@ -1,12 +1,12 @@
 # Daily English + Chinese expressions → Notion
 
 A daily automation that pulls real native expressions (podcasts, dictionary,
-example sentences, plus your own Instagram/YouTube picks), writes **10 advanced English**
+example sentences, plus your own Instagram/YouTube picks), writes **10 everyday English**
 and **10 beginner Chinese** cards into two separate Notion databases, and pings you on
 **Discord**. Built to run unattended as a Claude Code cloud routine (`/schedule`) — your PC
 can be off.
 
-- **English**: TOEIC 900+ / IELTS 8.0+ level, styles mixed (everyday / business / advanced-nuance).
+- **English**: practical everyday expressions (~8 high-frequency : ~2 advanced); styles everyday / situational / idiom / business.
 - **Chinese**: from the basics, progressing through HSK in order.
 - **No repeats**: 3-layer dedup (see below) skips anything already saved or too similar.
 - **Flashcard layout**: each entry's Notion page shows the example first with the meaning hidden
@@ -34,7 +34,7 @@ Python only does I/O. The routine's own Claude reasoning turns raw material into
 - `review.py` — SRS (spaced repetition): find due cards, reschedule on the Leitner curve.
 - `stats.py` — read-only learning aggregates (totals / due / box distribution / HSK / streak).
 - `notify.py` — Discord webhook senders (`notify_write` / `notify_review` / `notify_stats`).
-- `sources.py` — source fetchers: Merriam-Webster WOTD, BBC 6 Minute English (+transcript), Luke's English Podcast, HSK list, Tatoeba.
+- `sources.py` — source fetchers: Merriam-Webster WOTD, BBC 6 Minute English (+transcript), BBC The English We Speak (idioms/phrases), Luke's English Podcast, HSK list, Tatoeba.
 - `constants.py` — shared constants (`STYLES`, `TARGETS`, `SIM_THRESHOLD`, `INTERVALS`, …).
 - `routine_prompt.md` — the `/schedule` prompt.
 - `requirements.txt`, `.env.example`.

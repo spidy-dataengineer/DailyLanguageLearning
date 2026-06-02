@@ -8,6 +8,7 @@ source never breaks the run.
 |---|---|---|---|---|
 | Merriam-Webster WOTD | `merriam-webster.com/wotd/feed/rss2` | none | high (RSS) | ✅ |
 | BBC 6 Minute English | `podcasts.files.bbci.co.uk/p02pc9tn.rss` (+ transcript page) | none | high | ✅ |
+| BBC The English We Speak | `podcasts.files.bbci.co.uk/p02pc9zn.rss` (+ transcript page) | none | high | ✅ episode title = target phrase |
 | Luke's English Podcast | `teacherluke.co.uk/feed/` | none | high | ✅ |
 | Tatoeba | `data/tatoeba_eng.tsv` subset | none | high (local file) | optional (no file) |
 

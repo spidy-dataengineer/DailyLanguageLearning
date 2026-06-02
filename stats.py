@@ -12,6 +12,7 @@ import sys
 from notion_client import Client
 from notion_client.helpers import collect_paginated_api
 
+from constants import kst_today
 from notion_io import _client, _due_date, _plain, _select_name, data_source_id
 from notify import notify_stats
 
@@ -32,7 +33,7 @@ def _streak(dates: set, today: dt.date) -> int:
 
 def compute_stats(notion: Client) -> dict:
     """Read-only aggregates derived entirely from existing vocab rows — no dashboard DB, no new fields."""
-    today = dt.date.today()
+    today = kst_today()
     by_lang = {}
     dates: set = set()
     for lang, env in (("en", "NOTION_DB_ID_EN"), ("zh", "NOTION_DB_ID_ZH")):

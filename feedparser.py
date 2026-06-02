@@ -36,7 +36,11 @@ def parse(url):
                      or root.findall(".//entry"))
         for item in items[:10]:
             e = _Entry()
-            t = (item.find("title") or item.find("{http://www.w3.org/2005/Atom}title"))
+            # NOTE: `find(a) or find(b)` is wrong here — an Element with no children is falsy,
+            # so a text-only <title>/<description> would be skipped. Check `is not None`.
+            t = item.find("title")
+            if t is None:
+                t = item.find("{http://www.w3.org/2005/Atom}title")
             e.title = _text(t)
             lk = item.find("link")
             if lk is not None:
@@ -45,10 +49,13 @@ def parse(url):
                 lk = item.find("{http://www.w3.org/2005/Atom}link")
                 if lk is not None:
                     e.link = lk.get("href", "") or _text(lk)
-            desc = (item.find("description")
-                    or item.find("summary")
-                    or item.find("{http://www.w3.org/2005/Atom}summary")
-                    or item.find("{http://purl.org/rss/1.0/modules/content/}encoded"))
+            desc = None
+            for tag_name in ("description", "summary",
+                             "{http://www.w3.org/2005/Atom}summary",
+                             "{http://purl.org/rss/1.0/modules/content/}encoded"):
+                desc = item.find(tag_name)
+                if desc is not None:
+                    break
             e.summary = _text(desc)
             feed.entries.append(e)
     except Exception as ex:

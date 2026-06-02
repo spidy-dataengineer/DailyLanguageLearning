@@ -20,7 +20,7 @@ from notion_client import Client
 from notion_client.helpers import collect_paginated_api
 
 import sources
-from constants import EN_SOURCES, MAX_HSK_LEVEL, STYLES, TARGETS, ZH_SOURCES
+from constants import EN_SOURCES, MAX_HSK_LEVEL, STYLES, TARGETS, ZH_SOURCES, kst_today
 from dedup import similar_to_any
 from notify import notify_write
 
@@ -105,7 +105,7 @@ def inbox_unprocessed(notion: Client, language: str):
 def fetch(lang: str) -> None:
     from dedup import hsk_candidates  # local to avoid touching dedup at module load
     notion = _client()
-    today = dt.date.today().isoformat()
+    today = kst_today().isoformat()
     if lang == "en":
         rows = existing_rows(notion, os.environ["NOTION_DB_ID_EN"])
         out = {
@@ -115,6 +115,7 @@ def fetch(lang: str) -> None:
             "candidates": {
                 "merriam_webster": sources.mw_word_of_the_day(),
                 "bbc": sources.bbc_six_minute(),
+                "bbc_phrases": sources.bbc_the_english_we_speak(),
                 "lukes": sources.lukes_english(),
                 "tatoeba": sources.tatoeba_samples("eng", n=12),
                 "inbox": inbox_unprocessed(notion, "English"),
@@ -230,7 +231,7 @@ def _properties(item: dict, lang: str) -> dict:
         "Example (KO)": {"rich_text": _rich(item.get("example_ko"))},
         "Pronunciation": {"rich_text": _rich(item.get("pronunciation"))},
         "Usage note": {"rich_text": _rich(item.get("usage_note"))},
-        "Date": {"date": {"start": dt.date.today().isoformat()}},
+        "Date": {"date": {"start": kst_today().isoformat()}},
     }
     if item.get("style") in STYLES:
         props["Style"] = {"select": {"name": item["style"]}}
@@ -245,7 +246,7 @@ def _properties(item: dict, lang: str) -> dict:
         expr = item.get("expression")
         props["Audio"] = {"url": native_audio_url(expr, item.get("pronunciation")) or youglish_url(expr, lang)}
     props["Box"] = {"number": 1}
-    props["Next review"] = {"date": {"start": (dt.date.today() + dt.timedelta(days=1)).isoformat()}}
+    props["Next review"] = {"date": {"start": (kst_today() + dt.timedelta(days=1)).isoformat()}}
     return props
 
 
@@ -338,7 +339,7 @@ def _practice_body(sentences: list) -> list:
 def _write_practice(notion: Client, ds: str, sentences: list) -> None:
     if not sentences:
         return
-    today = dt.date.today().isoformat()
+    today = kst_today().isoformat()
     notion.pages.create(
         parent={"type": "data_source_id", "data_source_id": ds},
         properties={"Expression": {"title": _rich(f"📝 오늘의 연습 · {today}")},

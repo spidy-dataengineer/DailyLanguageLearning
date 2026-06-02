@@ -9,7 +9,8 @@ Each saved **vocab** card is reviewed on a forgetting curve. Practice rows (📝
 - New cards start **box 1**, `Next review = today + 1` (set in `notion_io._properties`).
 - Feedback = the Notion **`Recall`** select (the ONLY field you touch): `Got it` → box +1 (max 5);
   `Forgot` → reset to box 1. Unrated due cards keep their box and are simply re-scheduled.
-- Due = `Next review` empty **or** `<= today`.
+- Due = `Next review` empty **or** `<= today`. "today" = **Korea time** (`constants.kst_today`), so the
+  08:00 KST cloud run (23:00 UTC) stamps and compares against the correct local day, not the UTC day.
 
 ## Daily flow — `python daily_notion.py review` (run first each day)
 1. `due_rows()` finds due vocab cards in both DBs (skips practice rows = no `Meaning (KO)`).
