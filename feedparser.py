@@ -1,8 +1,24 @@
 """Minimal RSS/Atom feedparser shim for Python 3.11 (replaces broken feedparser 6.0.12)."""
+import html
+import re
 import xml.etree.ElementTree as ET
 import requests
 
 _UA = "daily-lang-notion/1.0"
+
+_XML_ENTS = (b"&amp;", b"&lt;", b"&gt;", b"&quot;", b"&apos;")
+
+
+def _resolve_entities(content: bytes) -> bytes:
+    """ElementTree only knows the 5 XML entities + numeric refs; WordPress/RSS feeds emit HTML
+    named entities (&nbsp; &mdash; &hellip; …) that make ET.fromstring raise 'undefined entity'.
+    Convert those to their UTF-8 bytes, leaving XML entities and numeric refs untouched."""
+    def repl(m):
+        ent = m.group(0)
+        if ent in _XML_ENTS or ent.startswith(b"&#"):
+            return ent
+        return html.unescape(ent.decode("ascii", "ignore")).encode("utf-8")
+    return re.sub(rb"&#?[0-9A-Za-z]+;", repl, content)
 _NS = {
     "atom": "http://www.w3.org/2005/Atom",
     "itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd",
@@ -27,7 +43,7 @@ def parse(url):
     try:
         r = requests.get(url, timeout=20, headers={"User-Agent": _UA})
         r.raise_for_status()
-        root = ET.fromstring(r.content)
+        root = ET.fromstring(_resolve_entities(r.content))
         tag = root.tag.lower()
         if "rss" in tag or root.tag == "rss":
             items = root.findall(".//item")
@@ -52,7 +68,8 @@ def parse(url):
             desc = None
             for tag_name in ("description", "summary",
                              "{http://www.w3.org/2005/Atom}summary",
-                             "{http://purl.org/rss/1.0/modules/content/}encoded"):
+                             "{http://purl.org/rss/1.0/modules/content/}encoded",
+                             ".//{http://search.yahoo.com/mrss/}description"):  # YouTube media:description
                 desc = item.find(tag_name)
                 if desc is not None:
                     break

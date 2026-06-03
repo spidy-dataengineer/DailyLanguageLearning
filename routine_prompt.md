@@ -33,11 +33,12 @@ does all I/O; **you** do the language selection + expansion. Work in the repo di
      - `idiom` — common idioms/colloquialisms people actually say ("read the room", "call it a day").
      - `business` — workplace / email / meeting phrasing ("circle back", "loop someone in", "touch base").
    - Material priority: (1) `candidates.inbox` (user-picked Instagram/YouTube — always use these
-     first), (2) `candidates.bbc_phrases` (each episode title IS a real idiom/phrase) and one of
-     `candidates.bbc` / `lukes` (pick a *different* primary source than recent days, for variety),
-     (3) `candidates.merriam_webster` as an occasional anchor. Use `candidates.tatoeba` for
-     authentic example sentences when helpful. Candidates are seeds — prefer real, common usage
-     over whatever happens to be rare in the source.
+     first), (2) `candidates.bbc_phrases` (each episode title IS a real idiom/phrase) and
+     `candidates.youtube` (latest uploads from everyday-English channels — the `title`/`description`
+     usually name the target phrase; mine those), plus one of `candidates.bbc` / `lukes` (pick a
+     *different* primary source than recent days, for variety), (3) `candidates.merriam_webster`
+     as an occasional anchor. Use `candidates.tatoeba` for authentic example sentences when helpful.
+     Candidates are seeds — prefer real, common usage over whatever happens to be rare in the source.
 
    **Chinese (10 items, beginner — 기초부터):**
    - Use `candidates.hsk` words (already filtered to unused, frequency order) as the backbone;

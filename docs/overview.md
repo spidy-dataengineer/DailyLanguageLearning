@@ -25,7 +25,7 @@ Python never calls an LLM API — generation happens inside the Claude routine, 
 | `review.py` | SRS review (Leitner intervals) | [review](review.md) |
 | `stats.py` | read-only learning aggregates | [stats](stats.md) |
 | `notify.py` | Discord webhook senders | [notify](notify.md) |
-| `sources.py` | seed fetchers (MW, BBC 6-min + The English We Speak, Luke's, HSK, Tatoeba) | [sources](sources.md) |
+| `sources.py` | seed fetchers (MW, BBC 6-min + The English We Speak, YouTube channels, Luke's, HSK, Tatoeba) | [sources](sources.md) |
 | `constants.py` | shared constants (STYLES, TARGETS, SIM_THRESHOLD, INTERVALS, …) | — |
 | `routine_prompt.md` | the generation prompt given to `/schedule` | [generation](generation.md) |
 | `.env` | secrets + DB IDs (gitignored) | — |

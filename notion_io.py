@@ -116,6 +116,7 @@ def fetch(lang: str) -> None:
                 "merriam_webster": sources.mw_word_of_the_day(),
                 "bbc": sources.bbc_six_minute(),
                 "bbc_phrases": sources.bbc_the_english_we_speak(),
+                "youtube": sources.youtube_channels(),
                 "lukes": sources.lukes_english(),
                 "tatoeba": sources.tatoeba_samples("eng", n=12),
                 "inbox": inbox_unprocessed(notion, "English"),

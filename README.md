@@ -34,7 +34,7 @@ Python only does I/O. The routine's own Claude reasoning turns raw material into
 - `review.py` — SRS (spaced repetition): find due cards, reschedule on the Leitner curve.
 - `stats.py` — read-only learning aggregates (totals / due / box distribution / HSK / streak).
 - `notify.py` — Discord webhook senders (`notify_write` / `notify_review` / `notify_stats`).
-- `sources.py` — source fetchers: Merriam-Webster WOTD, BBC 6 Minute English (+transcript), BBC The English We Speak (idioms/phrases), Luke's English Podcast, HSK list, Tatoeba.
+- `sources.py` — source fetchers: Merriam-Webster WOTD, BBC 6 Minute English (+transcript), BBC The English We Speak (idioms/phrases), everyday-English YouTube channels (`YT_CHANNELS`), Luke's English Podcast, HSK list, Tatoeba.
 - `constants.py` — shared constants (`STYLES`, `TARGETS`, `SIM_THRESHOLD`, `INTERVALS`, …).
 - `routine_prompt.md` — the `/schedule` prompt.
 - `requirements.txt`, `.env.example`.
@@ -79,12 +79,14 @@ daily time (min interval 1h). Use a one-off run to verify end-to-end.
 > Scheduler** (PC must be on).
 
 ## Manual drop: Instagram / YouTube
-Automated scraping of Instagram/YouTube isn't reliable for unattended runs (IG has no public
-API; YouTube transcripts are blocked from cloud IPs). Instead: when you find a reel/video you
-like, add a row to the **Language Inbox** database — paste the URL into `Link`, set `Language`,
-optionally paste the caption/transcript into `Raw text`. The next run processes unprocessed rows
-first, extracts an expression, files it under the right language DB (Source = Instagram/YouTube),
-and ticks `Processed`.
+The cloud routine **can't open** a reel/video URL (IG has no public API + login wall; YouTube
+transcripts are blocked from cloud IPs; the routine has no web-fetch tool + a network allowlist).
+So when you find a reel/video you like, add a row to the **Language Inbox** database — paste the URL
+into `Link` (stored as `source_url`, **not fetched**) and **paste the expression / caption / subtitle
+text into `Raw text`** (this is what actually becomes the card). Set `Language`. The next run processes
+unprocessed rows first, extracts the expression, files it under the right language DB (Source =
+Instagram/YouTube), and ticks `Processed` — so each row is handled **exactly once**. Full details &
+the auto-collection roadmap (YouTube-channel / RSS creators): [docs/inbox.md](docs/inbox.md).
 
 ## Dedup (the "skip if similar" logic)
 1. **Python pre-filter** (`fetch`) — normalizes existing expressions and drops near-identical

@@ -106,6 +106,31 @@ def lukes_english():
     return {"title": e.title, "url": e.link, "notes_excerpt": _text(getattr(e, "summary", ""))[:2000]}
 
 
+# Everyday-English YouTube channels (name -> channel_id). Each new upload's title + description
+# is seed material (learning-channel titles often contain the target phrase). Add/remove freely.
+YT_CHANNELS = {
+    "English with Lucy": "UCF6eEVtJokEFdaTDL5BKT4w",
+    "Rachel's English": "UCvn_XCl_mgQmt3sD753zdJA",
+    "Speak English With Vanessa": "UCxJGMJbjokfnr2-s4_RXPxQ",
+    "Papa Teach Me": "UCwk6ifONlkvqnoMF2uyA05g",
+    "BBC Learning English": "UCHaHD477h-FeBbVh9Sh7syA",
+    "linguamarina": "UCDt4AwxX8H3BHiTNtmDu83Q",
+}
+YT_FEED = "https://www.youtube.com/feeds/videos.xml?channel_id={}"
+
+
+def youtube_channels(per_channel: int = 1):
+    """Latest upload(s) from each channel in YT_CHANNELS. Returns
+    [{channel, title, description, url}]. Fail-soft per channel (the shim returns no
+    entries on error, so one dead feed just contributes nothing)."""
+    out = []
+    for name, cid in YT_CHANNELS.items():
+        for e in feedparser.parse(YT_FEED.format(cid)).entries[:per_channel]:
+            out.append({"channel": name, "title": e.title,
+                        "description": (getattr(e, "summary", "") or "")[:500], "url": e.link})
+    return out
+
+
 # --- Chinese -----------------------------------------------------------------
 
 HSK_RAW = ("https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary"
