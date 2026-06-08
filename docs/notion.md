@@ -16,7 +16,8 @@ Created by `python daily_notion.py init <en_page_id> <zh_page_id> [inbox_page_id
 `Expression`(title) · `Meaning (KO)` · `Example` · `Example (KO)` · `Pronunciation` ·
 `Style`(select) · `Level`(select: `EN-advanced` / `HSK1`–`HSK6`) · `Usage note` ·
 `Source`(select) · `Source URL`(url) · `Date` · `Audio`(url — ZH: native recording (audio-cmn mp3 → Wikimedia Commons ogg), else a YouGlish link; EN empty for now) ·
-`Box`(number) · `Next review`(date) · `Recall`(select: Got it/Forgot — the only field you mark) · `Last reviewed`(date) → SRS, see [review](review.md)
+`Box`(number) · `Next review`(date) · `Recall`(select: Got it/Forgot — the only field you mark) · `Last reviewed`(date) → SRS, see [review](review.md) ·
+`Year` · `Month` · `Week` (select — e.g. `2026` / `2026 04월` / `2026 04월 2주`): calendar buckets for grouping a view by 연도/월/주. Filled at write from `Date` (EN & ZH bucket identically); `migrate` backfills existing rows. Week starts Sunday; the week containing the 1st is week 1. See `constants.period_labels`.
 
 ## Inbox schema
 `Item`(title) · `Link`(url) · `Raw text` · `Language`(select) · `Note` · `Processed`(checkbox) · `Added`(date)
@@ -35,5 +36,6 @@ day's words, each a toggle (zh + pinyin visible, KO hidden). Comes from a
 `{"type":"practice","sentences":[{zh,pinyin,ko}…]}` object at the end of the ZH array.
 
 ## Tips
+- Weekly/monthly review: group a view by **Month** (sub-group by **Week**), or filter by **Year** — all from the period properties. Notion groups two levels at once, so for a full 연도→월→주 breakdown, filter to a Year then group Month→Week. Cards stay in one DB, so SRS/dedup/stats are unaffected.
 - Switch each DB to a **Gallery view** in Notion for card-style browsing.
 - Deleting rows = archive via `pages.update(archived=True)` (recoverable in Notion trash).

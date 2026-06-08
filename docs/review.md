@@ -30,3 +30,4 @@ Usage: open the ping on your phone → recall the meaning → tap the spoiler to
 - Discord webhooks are one-way → feedback flows through Notion `Recall`, never Discord.
 - Intervals are fixed Leitner (no SM-2 ease factors) — change `INTERVALS` in `constants.py` to retune.
 - The review ping also embeds a stats footer (`stats.compute_stats` → `notify._stats_lines`).
+- Browsing by period ≠ SRS: cards also carry `Year`/`Month`/`Week` selects (see [notion](notion.md)) so you can group a Notion view by Month→Week to re-read a given week's ~70 cards. That grouping is view-only; the forgetting-curve schedule above is independent of it.

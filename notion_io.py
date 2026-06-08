@@ -20,7 +20,7 @@ from notion_client import Client
 from notion_client.helpers import collect_paginated_api
 
 import sources
-from constants import EN_SOURCES, MAX_HSK_LEVEL, STYLES, TARGETS, ZH_SOURCES, kst_today
+from constants import EN_SOURCES, MAX_HSK_LEVEL, STYLES, TARGETS, ZH_SOURCES, kst_today, period_labels
 from dedup import similar_to_any
 from notify import notify_write
 
@@ -234,6 +234,8 @@ def _properties(item: dict, lang: str) -> dict:
         "Usage note": {"rich_text": _rich(item.get("usage_note"))},
         "Date": {"date": {"start": kst_today().isoformat()}},
     }
+    for name, val in period_labels(kst_today()).items():
+        props[name] = {"select": {"name": val}}
     if item.get("style") in STYLES:
         props["Style"] = {"select": {"name": item["style"]}}
     level = item.get("level") or ("EN-advanced" if lang == "en" else "")
@@ -340,11 +342,14 @@ def _practice_body(sentences: list) -> list:
 def _write_practice(notion: Client, ds: str, sentences: list) -> None:
     if not sentences:
         return
-    today = kst_today().isoformat()
+    today = kst_today()
+    props = {"Expression": {"title": _rich(f"📝 오늘의 연습 · {today.isoformat()}")},
+             "Date": {"date": {"start": today.isoformat()}}}
+    for name, val in period_labels(today).items():
+        props[name] = {"select": {"name": val}}
     notion.pages.create(
         parent={"type": "data_source_id", "data_source_id": ds},
-        properties={"Expression": {"title": _rich(f"📝 오늘의 연습 · {today}")},
-                    "Date": {"date": {"start": today}}},
+        properties=props,
         icon={"type": "emoji", "emoji": "✍️"},
         children=_practice_body(sentences))
 
@@ -400,6 +405,12 @@ _SRS_PROPS = {
     "Last reviewed": {"date": {}},
 }
 
+_PERIOD_PROPS = {
+    "Year": {"select": {}},
+    "Month": {"select": {}},
+    "Week": {"select": {}},
+}
+
 _EXPR_SCHEMA_BASE = {
     "Expression": {"title": {}},
     "Meaning (KO)": {"rich_text": {}},
@@ -412,6 +423,7 @@ _EXPR_SCHEMA_BASE = {
     "Date": {"date": {}},
     "Audio": {"url": {}},
     **_SRS_PROPS,
+    **_PERIOD_PROPS,
 }
 
 _INBOX_SCHEMA = {
@@ -463,9 +475,19 @@ def init(en_page_id: str, zh_page_id: str, inbox_page_id: str | None = None) -> 
 
 
 def migrate() -> None:
-    """Add SRS properties to the existing English + Chinese databases (idempotent)."""
+    """Add SRS + calendar-period (Year/Month/Week) properties to the English + Chinese databases,
+    then backfill Year/Month/Week on existing rows from each row's Date (idempotent)."""
     notion = _client()
     for env in ("NOTION_DB_ID_EN", "NOTION_DB_ID_ZH"):
-        notion.data_sources.update(data_source_id=data_source_id(notion, os.environ[env]),
-                                   properties=_SRS_PROPS)
-        print(f"migrated {env}: SRS properties ensured")
+        ds = data_source_id(notion, os.environ[env])
+        notion.data_sources.update(data_source_id=ds, properties={**_SRS_PROPS, **_PERIOD_PROPS})
+        backfilled = 0
+        for r in collect_paginated_api(notion.data_sources.query, data_source_id=ds):
+            d = _due_date(r.get("properties", {}).get("Date"))
+            if not d:
+                continue
+            labels = period_labels(dt.date.fromisoformat(d))
+            notion.pages.update(page_id=r["id"],
+                                properties={k: {"select": {"name": v}} for k, v in labels.items()})
+            backfilled += 1
+        print(f"migrated {env}: SRS + period properties ensured, backfilled {backfilled} rows")
