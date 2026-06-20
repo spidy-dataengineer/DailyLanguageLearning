@@ -19,8 +19,9 @@ Notion DBs** → **Discord** ping. Design docs (living source of truth): **start
 | Scheduling / deployment | — | `docs/deployment.md` |
 
 Code is grouped into **concern folders** — `notion/` (Notion gateway), `content/` (sources + dedup),
-`srs/` (review + stats), `notify/` (Discord) — each with a short `PRINCIPLES.md` of invariants that
-points to the detailed `docs/*.md`. `daily_notion.py`, `constants.py`, and the `feedparser.py` shim
+`srs/` (review + stats), `notify/` (Discord) — each with a short `PRINCIPLES.md` describing the module's
+role, its invariants, and how it connects to the others. **Read a module's `PRINCIPLES.md` before working
+in that folder** (they aren't auto-loaded; the Layout table above indexes them, code ⇄ doc). `daily_notion.py`, `constants.py`, and the `feedparser.py` shim
 stay at the **repo root**: `daily_notion.py` is the CLI entry (keeping the `python daily_notion.py <cmd>`
 surface), and root-on-`sys.path[0]` lets the packages import with **no install** and keeps the bare
 `import feedparser` resolving to the local shim. `docs/` remains the detailed source + cross-cutting
@@ -42,10 +43,10 @@ On every change that adds, edits, or deletes files, follow this loop:
 2. **Keep it organized by concern folder** — each module lives in its folder (`notion/`, `content/`,
    `srs/`, `notify/`; the CLI entry + shared leaves stay at root). A new concern gets its own folder and
    the related files moved in — don't let the root drift back to flat.
-3. **`PRINCIPLES.md` per folder, plus one at the repo root** — every concern folder carries one, and the
-   root `PRINCIPLES.md` is the top-level map (root files + data flow + links to the folder ones). Keep them
-   current in the same change: each file's role, its invariants, and **how it connects to the other modules**
-   (who imports it / what it calls). Detailed prose still lives in `docs/*.md`; `PRINCIPLES.md` is the short, local map.
+3. **Per-folder `PRINCIPLES.md`** — every concern folder has one: each file's role, its invariants, and
+   **how it connects to the other modules** (who imports it / what it calls). It isn't auto-loaded, so
+   **read the relevant module's `PRINCIPLES.md` before working in that folder** (this root `CLAUDE.md`
+   indexes them in the Layout table), and update it in the same change. Detailed prose lives in `docs/*.md`.
 4. **Living checklist (two levels)** — maintain a running list of what's implemented vs. still to add,
    **per-module and whole-project**. Review it when starting work and keep it current as you go: tick what's
    done, add each gap you discover. Mirror longer-lived items into `docs/plan.md` so they survive the session.
