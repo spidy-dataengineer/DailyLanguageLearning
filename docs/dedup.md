@@ -1,6 +1,6 @@
 # Dedup — "skip already-saved or similar"
 
-Code: `dedup.py` (`norm`, `similar`, `similar_to_any`, `hsk_candidates`). The write-time safety net is invoked from `notion_io.write`.
+Code: `content/dedup.py` (`norm`, `similar`, `similar_to_any`, `hsk_candidates`). The write-time safety net is invoked from `notion/notion_io.py` (`write`).
 
 3 layers. **No vector DB needed at current scale.**
 

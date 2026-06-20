@@ -1,6 +1,6 @@
 # Review (SRS — spaced repetition)
 
-Code: `review.py` (`due_rows`, `reschedule`, `review`). Schema migration in `notion_io.migrate`.
+Code: `srs/review.py` (`due_rows`, `reschedule`, `review`). Schema migration in `notion/notion_io.py` (`migrate`).
 
 Each saved **vocab** card is reviewed on a forgetting curve. Practice rows (📝) are excluded.
 

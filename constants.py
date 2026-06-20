@@ -1,7 +1,7 @@
 """Shared constants for the daily language-learning routine."""
 import datetime as dt
 
-STYLES = ["everyday", "situational", "idiom", "business"]
+STYLES = ["everyday", "business", "academic", "travel", "slang", "idiom"]
 EN_SOURCES = ["BBC", "Luke's", "Merriam-Webster", "Tatoeba", "Instagram", "YouTube"]
 ZH_SOURCES = ["HSK", "Tatoeba", "Instagram", "YouTube"]
 TARGETS = {"en": 10, "zh": 10}

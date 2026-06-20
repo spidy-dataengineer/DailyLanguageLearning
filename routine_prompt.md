@@ -21,24 +21,29 @@ does all I/O; **you** do the language selection + expansion. Work in the repo di
 2. Build two JSON arrays of item objects — for English and Chinese — selecting from the
    candidates and expanding each into a full learning card.
 
-   **English (10 items — practical everyday expressions):**
-   - Aim for expressions a learner can actually USE in daily life and real conversation.
-     Calibration anchors: "fair enough", "read the room", "can I make it to-go instead of drink it here".
-   - **Ratio (important): ~8 of 10 must be high-frequency, everyday-usable expressions;
-     ~2 may be lower-frequency or more advanced.** Do not fill the list with rare/literary vocabulary.
-   - Spread the 10 across four styles, weighted toward the everyday end; vary day to day:
+   **English (10 items — practical, real-use expressions across genres):**
+   - Pick expressions a learner can actually USE soon, in real conversation/writing. Prefer common,
+     currently-used wording; **avoid rare, literary, archaic, or "dictionary-word" vocabulary** — if it
+     wouldn't come up in everyday speech, work, class, or travel, skip it. Calibration anchors:
+     "fair enough", "read the room", "can I get this to-go", "let's circle back on this".
+   - **Ratio (important): ~8 of 10 must be high-frequency expressions people really say; ~2 may stretch.**
+     Do not fill the list with rare/literary words.
+   - Spread the 10 across these genres, **varied day to day** (rotate for weekly coverage — not all
+     genres every day), weighted toward the everyday end:
      - `everyday` — casual reactions / discourse / small talk ("no worries", "my bad", "fair enough").
-     - `situational` — functional phrases for a scenario: café/ordering, travel, shopping, appointments
-       ("can I get this to-go", "could we split the bill", "is this seat taken").
-     - `idiom` — common idioms/colloquialisms people actually say ("read the room", "call it a day").
      - `business` — workplace / email / meeting phrasing ("circle back", "loop someone in", "touch base").
+     - `academic` — university/class/study English ("could you elaborate on that", "to put it another way", "the data suggests").
+     - `travel` — airport / hotel / directions / getting around ("is this seat taken", "could we split the bill", "do you have any vacancies").
+     - `slang` — current, genuinely-used colloquial slang, not dated ("it's giving…", "no cap"); add a `usage_note` on register.
+     - `idiom` — common idioms/colloquialisms people actually say ("read the room", "call it a day").
    - Material priority: (1) `candidates.inbox` (user-picked Instagram/YouTube — always use these
      first), (2) `candidates.bbc_phrases` (each episode title IS a real idiom/phrase) and
      `candidates.youtube` (latest uploads from everyday-English channels — the `title`/`description`
      usually name the target phrase; mine those), plus one of `candidates.bbc` / `lukes` (pick a
-     *different* primary source than recent days, for variety), (3) `candidates.merriam_webster`
-     as an occasional anchor. Use `candidates.tatoeba` for authentic example sentences when helpful.
-     Candidates are seeds — prefer real, common usage over whatever happens to be rare in the source.
+     *different* primary source than recent days, for variety). **`candidates.merriam_webster` is a
+     LAST-RESORT anchor only** — its Word-of-the-Day is deliberately rare/literary, so use it sparingly
+     (if at all) and never let it pull the list toward obscure words. Use `candidates.tatoeba` for
+     authentic example sentences. Candidates are seeds — prefer real, common usage over source rarity.
 
    **Chinese (10 items, beginner — 기초부터):**
    - Use `candidates.hsk` words (already filtered to unused, frequency order) as the backbone;
@@ -73,12 +78,14 @@ does all I/O; **you** do the language selection + expansion. Work in the repo di
   "meaning_ko": "시작하자마자 곧바로 잘 해내다",
   "example": "The new manager hit the ground running, closing three deals in her first week.",
   "example_ko": "새 매니저는 부임하자마자 첫 주에 거래 세 건을 성사시키며 곧바로 성과를 냈다.",
+  "example2": "She joined mid-project but hit the ground running and caught up within days.",
+  "example2_ko": "그녀는 프로젝트 중간에 합류했지만 곧바로 적응해 며칠 만에 따라잡았다.",
   "pronunciation": "/hɪt ðə ɡraʊnd ˈrʌnɪŋ/",
   "style": "idiom",
   "level": "EN-advanced",
   "usage_note": "새 일·역할을 빠르게 잘 시작한다는 뜻. 'start strong'보다 관용적.",
-  "source": "Merriam-Webster",
-  "source_url": "https://www.merriam-webster.com/word-of-the-day",
+  "source": "BBC",
+  "source_url": "https://www.bbc.co.uk/learningenglish",
   "inbox_page_id": null
 }
 ```
@@ -95,4 +102,8 @@ Korean phonetic (한글)**, joined by ` · ` — e.g. `ài hào · 아이 하오
   `meaning_ko` + the full `example_ko` behind a "뜻 보기" toggle, and adds a reverse "거꾸로" toggle.
   So `example` **must contain the `expression` verbatim** (exact same wording, so the blank works) in
   real context, and the Korean lines must be accurate.
+- Provide a **second example** (`example2` + `example2_ko`) using the expression in a *different
+  situation or genre* (e.g. one everyday, one work/academic/travel). It's shown as context inside the
+  "뜻 보기" toggle (not blanked), so it needn't be cloze-safe but should still use the expression naturally.
+  English only for now (Chinese items may omit `example2`).
 - Output strict JSON for the two files (no trailing commas, UTF-8, `ensure_ascii` off).

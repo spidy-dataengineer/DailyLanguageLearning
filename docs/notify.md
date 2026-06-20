@@ -1,6 +1,6 @@
 # Notify — Discord webhook output
 
-Code: `notify.py`. Three senders + one shared formatter, all using a single `DISCORD_WEBHOOK_URL` env var.
+Code: `notify/notify.py`. Three senders + one shared formatter, all using a single `DISCORD_WEBHOOK_URL` env var.
 
 ## Pings
 

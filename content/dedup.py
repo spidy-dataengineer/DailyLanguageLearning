@@ -10,7 +10,7 @@ import difflib
 import re
 import sys
 
-import sources
+from content import sources
 from constants import MAX_HSK_LEVEL, SIM_THRESHOLD
 
 

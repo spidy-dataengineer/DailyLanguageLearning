@@ -1,6 +1,6 @@
 # Notion (schema & layout)
 
-Code: `notion_io.py` (everything Notion: client + schema + init/migrate + page layout + audio + fetch + write).
+Code: `notion/notion_io.py` (everything Notion: client + schema + init/migrate + page layout + audio + fetch + write).
 
 Uses the **2025-09-03 data-source model** (notion-client 3.1.0 default): create a DB with
 `initial_data_source`; query/write via `data_sources.query` / `pages.create(parent=data_source_id)`.
@@ -13,7 +13,7 @@ Uses the **2025-09-03 data-source model** (notion-client 3.1.0 default): create 
 Created by `python daily_notion.py init <en_page_id> <zh_page_id> [inbox_page_id]`.
 
 ## Expression schema (EN & ZH share structure)
-`Expression`(title) · `Meaning (KO)` · `Example` · `Example (KO)` · `Pronunciation` ·
+`Expression`(title) · `Meaning (KO)` · `Example` · `Example (KO)` · `Example 2` · `Example 2 (KO)` · `Pronunciation` ·
 `Style`(select) · `Level`(select: `EN-advanced` / `HSK1`–`HSK6`) · `Usage note` ·
 `Source`(select) · `Source URL`(url) · `Date` · `Audio`(url — ZH: native recording (audio-cmn mp3 → Wikimedia Commons ogg), else a YouGlish link; EN empty for now) ·
 `Box`(number) · `Next review`(date) · `Recall`(select: Got it/Forgot — the only field you mark) · `Last reviewed`(date) → SRS, see [review](review.md) ·

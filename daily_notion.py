@@ -10,21 +10,21 @@ Modes:
 
 Python only does I/O (gather + write). The /schedule routine's own Claude reasoning turns the
 fetched raw material into the day's items (see routine_prompt.md). Code is split by concern:
-  notion_io.py — Notion API + schema/init + page layout + audio + fetch + write
-  dedup.py     — similarity-based duplicate detection + HSK progression
-  review.py    — SRS (spaced repetition) review logic
-  stats.py     — read-only aggregates
-  notify.py    — Discord webhook senders
-  sources.py   — external source fetchers (MW, BBC, Luke's, HSK, Tatoeba)
-  constants.py — shared constants
+  notion/notion_io.py — Notion API + schema/init + page layout + audio + fetch + write
+  content/sources.py  — external source fetchers (MW, BBC, Luke's, HSK, Tatoeba)
+  content/dedup.py    — similarity-based duplicate detection + HSK progression
+  srs/review.py       — SRS (spaced repetition) review logic
+  srs/stats.py        — read-only aggregates
+  notify/notify.py    — Discord webhook senders
+  constants.py        — shared constants (root); feedparser.py — feedparser shim (root)
 """
 from __future__ import annotations
 
 import sys
 
-from notion_io import fetch, init, migrate, write
-from review import review
-from stats import stats
+from notion.notion_io import fetch, init, migrate, write
+from srs.review import review
+from srs.stats import stats
 
 
 def main(argv) -> None:

@@ -64,7 +64,9 @@ def notify_review(due: dict, stats: dict | None = None) -> None:
     for lang, flag in (("en", "🇬🇧 English"), ("zh", "🇨🇳 中文")):
         if due[lang]:
             lines += ["", f"**{flag}**"]
-            lines += [f"• **{r['expression']}** — ||{r['meaning_ko']}||" for r in due[lang]]
+            lines += [f"• **{r['expression']}** — ||{r['meaning_ko']}|| "
+                      f"([Notion](https://www.notion.so/{r['page_id'].replace('-', '')}))"
+                      for r in due[lang]]
     if stats:
         lines += [""] + _stats_lines(stats)
     try:

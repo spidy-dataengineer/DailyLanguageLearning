@@ -13,8 +13,8 @@ from notion_client import Client
 from notion_client.helpers import collect_paginated_api
 
 from constants import kst_today
-from notion_io import _client, _due_date, _plain, _select_name, data_source_id
-from notify import notify_stats
+from notion.notion_io import _client, _due_date, _plain, _select_name, data_source_id
+from notify.notify import notify_stats
 
 
 def _log(msg: str) -> None:

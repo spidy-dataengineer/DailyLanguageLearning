@@ -19,10 +19,10 @@ from dotenv import load_dotenv
 from notion_client import Client
 from notion_client.helpers import collect_paginated_api
 
-import sources
+from content import sources
 from constants import EN_SOURCES, MAX_HSK_LEVEL, STYLES, TARGETS, ZH_SOURCES, kst_today, period_labels
-from dedup import similar_to_any
-from notify import notify_write
+from content.dedup import similar_to_any
+from notify.notify import notify_write
 
 load_dotenv()
 
@@ -103,7 +103,7 @@ def inbox_unprocessed(notion: Client, language: str):
 # --- fetch mode --------------------------------------------------------------
 
 def fetch(lang: str) -> None:
-    from dedup import hsk_candidates  # local to avoid touching dedup at module load
+    from content.dedup import hsk_candidates  # local to avoid touching dedup at module load
     notion = _client()
     today = kst_today().isoformat()
     if lang == "en":
@@ -230,6 +230,8 @@ def _properties(item: dict, lang: str) -> dict:
         "Meaning (KO)": {"rich_text": _rich(item.get("meaning_ko"))},
         "Example": {"rich_text": _rich(item.get("example"))},
         "Example (KO)": {"rich_text": _rich(item.get("example_ko"))},
+        "Example 2": {"rich_text": _rich(item.get("example2"))},
+        "Example 2 (KO)": {"rich_text": _rich(item.get("example2_ko"))},
         "Pronunciation": {"rich_text": _rich(item.get("pronunciation"))},
         "Usage note": {"rich_text": _rich(item.get("usage_note"))},
         "Date": {"date": {"start": kst_today().isoformat()}},
@@ -299,6 +301,10 @@ def _page_body(item: dict, lang: str) -> list:
         answer.append(_para(example))
     if item.get("example_ko"):
         answer.append(_para("→ " + item["example_ko"]))
+    if item.get("example2"):
+        answer.append(_para("〔다른 상황〕 " + item["example2"]))
+        if item.get("example2_ko"):
+            answer.append(_para("→ " + item["example2_ko"]))
     blocks.append(_toggle("👀 뜻 보기", answer or [_para("—")]))
     rev_label = "🔄 거꾸로 (뜻→표현)" + (f": {item['meaning_ko']}" if item.get("meaning_ko") else "")
     blocks.append(_toggle(rev_label, [_para(item.get("expression") or "—")]))
@@ -411,6 +417,11 @@ _PERIOD_PROPS = {
     "Week": {"select": {}},
 }
 
+_EXAMPLE2_PROPS = {
+    "Example 2": {"rich_text": {}},
+    "Example 2 (KO)": {"rich_text": {}},
+}
+
 _EXPR_SCHEMA_BASE = {
     "Expression": {"title": {}},
     "Meaning (KO)": {"rich_text": {}},
@@ -424,6 +435,7 @@ _EXPR_SCHEMA_BASE = {
     "Audio": {"url": {}},
     **_SRS_PROPS,
     **_PERIOD_PROPS,
+    **_EXAMPLE2_PROPS,
 }
 
 _INBOX_SCHEMA = {
@@ -475,19 +487,23 @@ def init(en_page_id: str, zh_page_id: str, inbox_page_id: str | None = None) -> 
 
 
 def migrate() -> None:
-    """Add SRS + calendar-period (Year/Month/Week) properties to the English + Chinese databases,
-    then backfill Year/Month/Week on existing rows from each row's Date (idempotent)."""
+    """Add SRS + calendar-period (Year/Month/Week) + Example 2 properties to the English + Chinese
+    databases, then backfill Year/Month/Week on rows that lack them, from each row's Date (idempotent)."""
     notion = _client()
     for env in ("NOTION_DB_ID_EN", "NOTION_DB_ID_ZH"):
         ds = data_source_id(notion, os.environ[env])
-        notion.data_sources.update(data_source_id=ds, properties={**_SRS_PROPS, **_PERIOD_PROPS})
+        notion.data_sources.update(data_source_id=ds,
+                                   properties={**_SRS_PROPS, **_PERIOD_PROPS, **_EXAMPLE2_PROPS})
         backfilled = 0
         for r in collect_paginated_api(notion.data_sources.query, data_source_id=ds):
-            d = _due_date(r.get("properties", {}).get("Date"))
+            p = r.get("properties", {})
+            if _select_name(p.get("Week")):
+                continue  # period labels already set on a prior migrate
+            d = _due_date(p.get("Date"))
             if not d:
                 continue
             labels = period_labels(dt.date.fromisoformat(d))
             notion.pages.update(page_id=r["id"],
                                 properties={k: {"select": {"name": v}} for k, v in labels.items()})
             backfilled += 1
-        print(f"migrated {env}: SRS + period properties ensured, backfilled {backfilled} rows")
+        print(f"migrated {env}: SRS + period + Example 2 properties ensured, backfilled {backfilled} rows")

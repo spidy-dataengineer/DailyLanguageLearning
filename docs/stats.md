@@ -1,6 +1,6 @@
 # Stats (read-only aggregates)
 
-Code: `stats.py` (`_streak`, `compute_stats`, `stats`). Discord lines are formatted by `notify._stats_lines` and dispatched by `notify.notify_stats`.
+Code: `srs/stats.py` (`_streak`, `compute_stats`, `stats`). Discord lines are formatted by `notify._stats_lines` and dispatched by `notify.notify_stats`.
 
 Learning progress derived **entirely from existing rows** — no dashboard DB, no new properties, no state fields.
 

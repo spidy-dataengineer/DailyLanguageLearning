@@ -14,13 +14,18 @@ New cards enter the SRS review loop at box 1 — see [review](review.md).
   fixed label `EN-advanced` — it isn't aggregated in stats for EN, so re-labelling only churns Notion options.)
 - **Chinese**: from **HSK1, in order** (progression tracked via the DB). Beginner-appropriate, short.
 
-## Style
-Four styles — `everyday` / `situational` / `idiom` / `business` — spread across the English items
-**weighted toward the everyday end**, varied day to day:
-- `everyday` — casual reactions / discourse / small talk; `situational` — functional phrases tied to a
-  scenario (café, travel, shopping); `idiom` — common idioms/colloquialisms; `business` — workplace/email/meeting.
+## Style (genre)
+Six genres — `everyday` / `business` / `academic` / `travel` / `slang` / `idiom` (in `STYLES`,
+`constants.py`) — spread across the English items **weighted toward the everyday end**, rotated for
+coverage over the week (not all genres daily):
+- `everyday` — casual reactions / small talk; `business` — workplace/email/meeting; `academic` —
+  university/class/study (lectures, seminars, papers); `travel` — airport/hotel/directions; `slang` —
+  current, genuinely-used colloquial slang (with a register `usage_note`); `idiom` — common idioms.
+- **Practicality first**: prefer common, currently-used expressions; avoid rare/literary/archaic words.
+  `candidates.merriam_webster` (Word-of-the-Day) is a **last-resort anchor only** — it skews obscure.
+  (Retired the old `situational` tag — its café/travel/shopping content now lives under `travel`/`everyday`.)
 
-Chinese stays everyday-focused while at beginner level (no style tag needed).
+Chinese stays everyday-focused while at beginner level (no genre tag needed).
 
 ## Pronunciation
 - English = **IPA** only (e.g. `/ˈpælətəbl̩/`).
@@ -42,8 +47,10 @@ Append one `{"type":"practice","sentences":[{zh,pinyin,ko}…]}` (3–4 sentence
 words). English has none yet — could add for parity later.
 
 ## Item contract (JSON)
-`expression` · `meaning_ko` · `example` · `example_ko` · `pronunciation` · `style` · `level` ·
-`usage_note` · `source` · `source_url` · `inbox_page_id`. Exact schema + example in `routine_prompt.md`.
+`expression` · `meaning_ko` · `example` · `example_ko` · `example2` · `example2_ko` · `pronunciation` ·
+`style` · `level` · `usage_note` · `source` · `source_url` · `inbox_page_id`. Exact schema + example in `routine_prompt.md`.
 - **`example` must contain `expression` verbatim** — the card blanks it out (`____`) for cloze active recall
   (`cloze()`), and a reverse `거꾸로` toggle drills meaning→expression. If the expression isn't found, the blank
-  is skipped (fail-soft) and the full sentence is shown. No new fields — pure rendering.
+  is skipped (fail-soft) and the full sentence is shown.
+- **`example2` / `example2_ko`** (English; ZH may omit): a second real usage in a *different situation/genre*,
+  rendered as context inside the `뜻 보기` toggle (not blanked). Stored in `Example 2` / `Example 2 (KO)`.
