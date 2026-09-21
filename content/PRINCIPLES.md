@@ -7,5 +7,7 @@
 - Dedup is a **conservative safety net** (exact / case-punct variant / containment / reorder / ≥threshold).
   Morphological & semantic near-duplicates are the routine-Claude's job via the `avoid` list, not here.
 - HSK progression walks levels low→high using already-saved words.
+- Each HSK word → `readings` (`_readings`): junk dictionary entries dropped **unless** that leaves
+  nothing (北京, 好玩儿), same-pinyin entries merged. Picking which readings to teach stays the routine's call.
 
 Detail → [../docs/sources.md](../docs/sources.md) · [../docs/dedup.md](../docs/dedup.md)

@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import os
 import random
+import re
 import sys
+from itertools import chain, zip_longest
 
 import feedparser
 import requests
@@ -127,6 +129,36 @@ HSK_RAW = ("https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary
            "/main/wordlists/exclusive/new/{level}.json")
 _hsk_cache: dict[int, list] = {}
 
+# Dictionary noise for a learner card: surnames, cross-references, archaic/regional-only senses.
+_JUNK_SENSE = re.compile(
+    r"^(surname|see |used in|abbr\. for|taiwan pr\.|\((archaic|classical|literary|tw)\)|(\w+ )?variant of)",
+    re.I)
+
+
+def _is_junk(form: dict) -> bool:
+    pinyin = (form.get("transcriptions") or {}).get("pinyin", "")
+    first = (form.get("meanings") or [""])[0] or ""
+    return pinyin[:1].isupper() or bool(_JUNK_SENSE.match(first))  # capital pinyin = proper noun
+
+
+def _readings(forms: list) -> list:
+    """One {pinyin, meanings} per distinct pronunciation, junk senses dropped — unless that would
+    leave nothing: 北京 / 中国 / 好玩儿 have only a proper-noun or erhua entry, and that entry IS the word."""
+    kept = [f for f in forms if not _is_junk(f)] or forms
+    by_pinyin: dict[str, list] = {}
+    for f in kept:
+        by_pinyin.setdefault((f.get("transcriptions") or {}).get("pinyin", ""), []).append(f.get("meanings") or [])
+    readings = []
+    for pinyin, lists in by_pinyin.items():
+        # Interleave (1st sense of each entry, then 2nd, ...): dictionary order is etymological, so a
+        # later entry's core sense (后 "back", after 后 "empress") must not be cut off by the cap.
+        ms = []
+        for m in chain.from_iterable(zip_longest(*lists)):
+            if m and m not in ms:
+                ms.append(m)
+        readings.append({"pinyin": pinyin, "meanings": ms[:6]})
+    return readings
+
 
 def hsk_level_words(level: int):
     if level in _hsk_cache:
@@ -135,12 +167,9 @@ def hsk_level_words(level: int):
     words = []
     if r:
         for item in r.json():
-            forms = item.get("forms") or [{}]
-            tr = forms[0].get("transcriptions") or {}
             words.append({
                 "simplified": item.get("simplified", ""),
-                "pinyin": tr.get("pinyin", ""),
-                "meanings": (forms[0].get("meanings") or [])[:3],
+                "readings": _readings(item.get("forms") or []),
             })
     _hsk_cache[level] = words
     return words

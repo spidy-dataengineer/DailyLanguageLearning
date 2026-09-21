@@ -15,7 +15,7 @@ source never breaks the run.
 ## Chinese
 | Source | Where | Auth | Status |
 |---|---|---|---|
-| HSK list | `drkameleon/complete-hsk-vocabulary` raw JSON, per level | none | ✅ progression backbone |
+| HSK list | `drkameleon/complete-hsk-vocabulary` raw JSON, per level | none | ✅ progression backbone; each word → `readings` (see below) |
 | Tatoeba | `data/tatoeba_cmn.tsv` subset | none | optional |
 
 ## Dropped
@@ -24,6 +24,22 @@ source never breaks the run.
   prompt flagged it "last resort". Removed the fetcher, the `MW_WOTD_RSS` constant, and the
   `candidates.merriam_webster` key. `Merriam-Webster` stays in `EN_SOURCES` so cards already written
   keep their label.
+
+## HSK readings (`_readings`)
+Each word in the source carries several dictionary entries (`forms`). Taking only `forms[0]` (the old
+behavior) handed the routine 360 of the 5,363 HSK 1–6 words with a useless first entry — 角 as
+"surname Jue", 克 as "abbr. for Croatia", 句 as "variant of 勾" — and dropped real second readings
+(行 xíng). Now every word becomes `readings: [{pinyin, meanings}]`:
+- Drop junk entries: capitalised pinyin (surname / place name) and senses starting `surname`,
+  `see`, `used in`, `abbr. for`, `Taiwan pr.`, `(archaic|classical|literary|Tw)`, `… variant of`.
+- **Unless that leaves nothing** — 59 words (北京, 中国, 汉语, 星期天, 春节, 好玩儿 …) have only a
+  proper-noun or erhua entry, and that entry *is* the word, so it stays.
+- Merge entries with the same pinyin (72 words, e.g. 后 hòu ×2) by **interleaving** their senses, 6 max:
+  dictionary order is etymological, so 后 lists "empress" before "back" and 干 gàn lists "to do"
+  fifth — a cap of 3 would cut both core HSK1 senses off.
+- Result over HSK 1–6: 1 reading ≈ 5,000 words, 2 ≈ 250, 3+ ≈ 35. Which of a 3+ word's readings a
+  beginner needs (的 → just `de`) is a language call, left to the routine — see
+  [generation](generation.md#chinese-multi-reading-cards).
 
 ## Not sources (handled by manual-drop Inbox)
 - **YouTube transcripts** — blocked from cloud/datacenter IPs (2026); only video descriptions are reliably fetchable.

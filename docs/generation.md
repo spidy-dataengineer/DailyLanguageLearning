@@ -53,6 +53,15 @@ its own knowledge and records `Source` = `Claude`, `Source URL` = null. `Source`
 BBC **The English We Speak** (`candidates.bbc_phrases`) is an idiom/phrase seed — each episode title
 is itself a real phrase (e.g. "read the room"); its cards record `Source` = `BBC` (shared label).
 
+## Chinese multi-reading cards
+A 多音字 like 角 (jiǎo 모서리 / jué 역할) becomes **one card covering every reading a learner at the
+current HSK level meets** — not two cards (same expression → the second would be deduped away).
+`pronunciation` joins readings with ` / `, `meaning_ko` numbers them (① ②), `example` shows
+reading ①, `example2` reading ② (required here), a third goes in `usage_note`. Rare/literary/
+regional readings are skipped even when listed (的 → just `de`). Audio: audio-cmn is keyed by the
+character, so the card gets one recording (usually the common reading); the Commons fallback
+matches on the joined pinyin.
+
 ## Chinese practice
 Append one `{"type":"practice","sentences":[{zh,pinyin,ko}…]}` (3–4 sentences weaving the day's
 words). English has none yet — could add for parity later.

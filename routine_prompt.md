@@ -58,6 +58,18 @@ does all I/O; **you** do the language selection + expansion. Work in the repo di
    **Chinese (10 items, beginner — 기초부터):**
    - Use `candidates.hsk` words (already filtered to unused, frequency order) as the backbone;
      use `candidates.tatoeba` for real example sentences; use `candidates.inbox` first if present.
+   - Each `candidates.hsk` word lists its `readings` — one `{pinyin, meanings}` per pronunciation,
+     with dictionary noise (surnames, `variant of` / `see` cross-references, archaic senses) already
+     dropped. **When a word has 2+ readings, make ONE card that teaches every reading a learner at
+     this level actually meets**, and skip readings that are rare, literary, or regional even if
+     listed. E.g. 角 → jiǎo (모서리) + jué (角色 역할); 了 → le + liǎo; 的 → just `de`.
+     - `pronunciation`: readings joined by ` / ` — `jiǎo · 지아오 / jué · 쥐에`
+     - `meaning_ko`: numbered per reading — `① 모서리, 각 ② (角色) 역할`
+     - `example` uses reading ①; `example2` + `example2_ko` use reading ② (required for these cards);
+       a third reading goes in `usage_note`.
+     A word with one reading stays a normal single-reading card.
+   - `meanings` are in **dictionary order, not frequency order** — teach the sense a learner at
+     this HSK level needs, which may not be listed first (后 → 뒤, 후 — not 황후; 干 gàn → 하다).
    - Keep it beginner-appropriate: short, high-frequency, simple sentences. `level` =
      `HSK<current_hsk_level>`.
    - **Also append ONE practice object at the END of the Chinese array** that weaves several of
@@ -115,5 +127,5 @@ Korean phonetic (한글)**, joined by ` · ` — e.g. `ài hào · 아이 하오
 - Provide a **second example** (`example2` + `example2_ko`) using the expression in a *different
   situation or genre* (e.g. one everyday, one work/academic/travel). It's shown as context inside the
   "뜻 보기" toggle (not blanked), so it needn't be cloze-safe but should still use the expression naturally.
-  English only for now (Chinese items may omit `example2`).
+  Chinese items may omit `example2` — except multi-reading cards, where it carries reading ②.
 - Output strict JSON for the two files (no trailing commas, UTF-8, `ensure_ascii` off).
