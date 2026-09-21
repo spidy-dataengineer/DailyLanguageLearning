@@ -10,7 +10,7 @@ fetch (Python, I/O) → generate (routine Claude) → write (Python, I/O) → Di
 - **review** — (run first each day) resurface due cards on the forgetting curve + an active-recall Discord ping (with a stats footer). See [review](review.md).
 - **stats** — (on-demand) read-only learning aggregates → JSON + Discord summary. See [stats](stats.md).
 - **fetch** — gather real source material + the `avoid` list (already-saved expressions). No judgment.
-- **generate** — the scheduled routine's own Claude turns raw material into 10 EN + 10 ZH cards
+- **generate** — the scheduled routine's own Claude turns raw material into 30 EN + 10 ZH cards
   (+ 1 Chinese practice entry), honoring level/style/dedup rules. See [generation](generation.md).
 - **write** — create Notion rows + flashcard page bodies, mark inbox processed, Discord ping.
 
@@ -36,7 +36,7 @@ Python never calls an LLM API — generation happens inside the Claude routine, 
 - Notification: **Discord webhook** (static URL → phone push).
 - **English & Chinese kept fully separate** — two DBs/pages, never merged in one entry.
 - Instagram/YouTube: **manual-drop Inbox**, not scraping (no API / ToS / cloud-IP blocks).
-- Volume **10 + 10/day**; pronunciation EN=IPA, ZH=pinyin+한글; **flashcard (active-recall)** layout.
+- Volume **30 EN (10 everyday · 10 business · 10 IELTS) + 10 ZH/day**; pronunciation EN=IPA, ZH=pinyin+한글; **flashcard (active-recall)** layout.
 
 ## Status & roadmap
 - ✅ Code built & live-verified; 3 Notion DBs; Discord notify; flashcard + Chinese practice + **SRS review** + **ZH pronunciation audio** (inline native recording: audio-cmn → Wikimedia Commons, YouGlish-link fallback) live.

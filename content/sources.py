@@ -40,19 +40,9 @@ def _text(html: str) -> str:
 
 # --- English -----------------------------------------------------------------
 
-MW_WOTD_RSS = "https://www.merriam-webster.com/wotd/feed/rss2"
 BBC_6MIN_RSS = "https://podcasts.files.bbci.co.uk/p02pc9tn.rss"
 BBC_TEWS_RSS = "https://podcasts.files.bbci.co.uk/p02pc9zn.rss"
 LUKES_RSS = "https://teacherluke.co.uk/feed/"
-
-
-def mw_word_of_the_day():
-    feed = feedparser.parse(MW_WOTD_RSS)
-    if not feed.entries:
-        _log("MW WOTD: no entries")
-        return None
-    e = feed.entries[0]
-    return {"word": e.title, "definition": _text(getattr(e, "summary", ""))[:600], "url": e.link}
 
 
 def bbc_six_minute():

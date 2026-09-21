@@ -13,8 +13,11 @@ Code: `notify/notify.py`. Three senders + one shared formatter, all using a sing
 All three:
 - No-op if `DISCORD_WEBHOOK_URL` is unset (logs and returns).
 - No-op if nothing to send (`notify_write` skips when both lists are empty; `notify_review` skips when `due` is empty).
-- Truncate `content` at 1990 chars (Discord's 2000-char limit, with margin).
-- Fail-soft: `RequestException` is caught and logged; the routine continues.
+- Split into as many messages as needed, **only between lines**, each ≤1990 chars (Discord's 2000-char
+  limit, with margin) — `_chunks` / `_post`. A 30 EN + 10 ZH day no longer fits one message; the old
+  single-message truncation silently cut off the Chinese list and the Notion links.
+- Fail-soft: `RequestException` is caught and logged; the routine continues. A multi-part ping stops at
+  the first failed part so later parts never arrive out of order.
 
 ## Shared formatter — `_stats_lines(s)`
 

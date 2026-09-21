@@ -6,7 +6,6 @@ source never breaks the run.
 ## English
 | Source | Feed/URL | Auth | Cloud reliability | Status |
 |---|---|---|---|---|
-| Merriam-Webster WOTD | `merriam-webster.com/wotd/feed/rss2` | none | high (RSS) | ✅ |
 | BBC 6 Minute English | `podcasts.files.bbci.co.uk/p02pc9tn.rss` (+ transcript page) | none | high | ✅ |
 | BBC The English We Speak | `podcasts.files.bbci.co.uk/p02pc9zn.rss` (+ transcript page) | none | high | ✅ episode title = target phrase |
 | YouTube channels | `youtube.com/feeds/videos.xml?channel_id=…` per channel (`sources.YT_CHANNELS`) | none | high | ✅ latest uploads' title + description; allowlist `youtube.com` |
@@ -18,6 +17,13 @@ source never breaks the run.
 |---|---|---|---|
 | HSK list | `drkameleon/complete-hsk-vocabulary` raw JSON, per level | none | ✅ progression backbone |
 | Tatoeba | `data/tatoeba_cmn.tsv` subset | none | optional |
+
+## Dropped
+- **Merriam-Webster Word-of-the-Day** (removed 2026-09) — the RSS feed worked fine, but its word is
+  deliberately rare/literary and was the main reason English cards drifted obscure, even while the
+  prompt flagged it "last resort". Removed the fetcher, the `MW_WOTD_RSS` constant, and the
+  `candidates.merriam_webster` key. `Merriam-Webster` stays in `EN_SOURCES` so cards already written
+  keep their label.
 
 ## Not sources (handled by manual-drop Inbox)
 - **YouTube transcripts** — blocked from cloud/datacenter IPs (2026); only video descriptions are reliably fetchable.

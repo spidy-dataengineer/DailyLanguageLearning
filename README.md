@@ -1,12 +1,12 @@
 # Daily English + Chinese expressions → Notion
 
 A daily automation that pulls real native expressions (podcasts, dictionary,
-example sentences, plus your own Instagram/YouTube picks), writes **10 everyday English**
+example sentences, plus your own Instagram/YouTube picks), writes **30 English** (10 everyday · 10 business · 10 IELTS)
 and **10 beginner Chinese** cards into two separate Notion databases, and pings you on
 **Discord**. Built to run unattended as a Claude Code cloud routine (`/schedule`) — your PC
 can be off.
 
-- **English**: practical everyday expressions (~8 high-frequency : ~2 advanced); styles everyday / situational / idiom / business.
+- **English**: a fixed daily split — **10 everyday · 10 business · 10 IELTS** (30/day); the other tags (academic / travel / slang / idiom) ride inside the everyday slots.
 - **Chinese**: from the basics, progressing through HSK in order.
 - **No repeats**: 3-layer dedup (see below) skips anything already saved or too similar.
 - **Flashcard layout**: each entry's Notion page shows the example first with the meaning hidden
@@ -20,7 +20,7 @@ can be off.
 
 ```
 fetch (Python)        → gathers real source material + the "avoid" list  → JSON
-generate (routine AI) → picks & expands into 10 EN + 10 ZH cards         → en_items.json / zh_items.json
+generate (routine AI) → picks & expands into 30 EN + 10 ZH cards         → en_items.json / zh_items.json
 write (Python)        → creates Notion rows, marks inbox done, Discord ping
 ```
 
@@ -34,7 +34,7 @@ Python only does I/O. The routine's own Claude reasoning turns raw material into
 - `review.py` — SRS (spaced repetition): find due cards, reschedule on the Leitner curve.
 - `stats.py` — read-only learning aggregates (totals / due / box distribution / HSK / streak).
 - `notify.py` — Discord webhook senders (`notify_write` / `notify_review` / `notify_stats`).
-- `sources.py` — source fetchers: Merriam-Webster WOTD, BBC 6 Minute English (+transcript), BBC The English We Speak (idioms/phrases), everyday-English YouTube channels (`YT_CHANNELS`), Luke's English Podcast, HSK list, Tatoeba.
+- `sources.py` — source fetchers: BBC 6 Minute English (+transcript), BBC The English We Speak (idioms/phrases), everyday-English YouTube channels (`YT_CHANNELS`), Luke's English Podcast, HSK list, Tatoeba.
 - `constants.py` — shared constants (`STYLES`, `TARGETS`, `SIM_THRESHOLD`, `INTERVALS`, …).
 - `routine_prompt.md` — the `/schedule` prompt.
 - `requirements.txt`, `.env.example`.

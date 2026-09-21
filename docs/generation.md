@@ -4,25 +4,33 @@ The scheduled routine's Claude produces the daily items from `fetch` output, fol
 `routine_prompt.md`. This doc is the **policy/rationale**; edit both together when changing rules.
 
 ## Volume
-`TARGETS = {"en": 10, "zh": 10}` in `daily_notion.py` → 20/day total. Ambitious — pair with review;
+`TARGETS = {"en": 30, "zh": 10}` in `constants.py` → 40/day total. Ambitious — pair with review;
 lower anytime. `fetch` over-provides candidates (e.g. ~20 HSK words) so dedup still leaves enough.
 New cards enter the SRS review loop at box 1 — see [review](review.md).
+**The frequency test beats the count**: at 10 per slot per day the pool of genuinely common
+expressions thins out over months, so a slot may come in under 10 rather than be padded with rare
+wording; the run reports the per-slot count.
 
 ## Level
-- **English**: practical, **high-frequency everyday expressions** usable in real conversation —
-  ~8 of 10 high-frequency, ~2 may be lower-frequency / more advanced. (The `Level` select stays the
-  fixed label `EN-advanced` — it isn't aggregated in stats for EN, so re-labelling only churns Notion options.)
+- **English**: a **fixed split by purpose** — 10 everyday · 10 business · 10 IELTS (see Style below).
+  The 20 everyday+business items must pass a frequency test; the 10 IELTS items are the only slots where
+  formal, lower-frequency wording is allowed. (The `Level` select stays the fixed label `EN-advanced` —
+  it isn't aggregated in stats for EN, so re-labelling only churns Notion options.)
 - **Chinese**: from **HSK1, in order** (progression tracked via the DB). Beginner-appropriate, short.
 
 ## Style (genre)
-Six genres — `everyday` / `business` / `academic` / `travel` / `slang` / `idiom` (in `STYLES`,
-`constants.py`) — spread across the English items **weighted toward the everyday end**, rotated for
-coverage over the week (not all genres daily):
-- `everyday` — casual reactions / small talk; `business` — workplace/email/meeting; `academic` —
-  university/class/study (lectures, seminars, papers); `travel` — airport/hotel/directions; `slang` —
-  current, genuinely-used colloquial slang (with a register `usage_note`); `idiom` — common idioms.
-- **Practicality first**: prefer common, currently-used expressions; avoid rare/literary/archaic words.
-  `candidates.merriam_webster` (Word-of-the-Day) is a **last-resort anchor only** — it skews obscure.
+Seven genres — `everyday` / `business` / `ielts` / `academic` / `travel` / `slang` / `idiom` (in
+`STYLES`, `constants.py`). The English 30 use a **fixed split, every run**: **10 `everyday` · 10
+`business` · 10 `ielts`**. The other four tags stay valid labels for an item that naturally belongs
+there, but hold no reserved slots — they ride inside the ten `everyday` ones.
+- `everyday` — casual reactions / small talk / current idioms; `business` — workplace, email, meeting;
+  `ielts` — academic/exam vocabulary and the collocations it lives in, with `usage_note` naming where
+  it earns marks; `academic` — university/class/study; `travel` — airport/hotel/directions; `slang` —
+  current colloquial slang (with a register `usage_note`); `idiom` — common idioms.
+- **Why fixed rather than rotated** (2026-09): the old "rotate genres, weighted toward everyday"
+  wording let rare and literary words through. The 20 everyday+business items now carry a frequency
+  test — *would a real person say this at work or with friends this month?* — and `ielts` is the only
+  slot where formal, lower-frequency wording is allowed, and even there it must be exam-useful.
   (Retired the old `situational` tag — its café/travel/shopping content now lives under `travel`/`everyday`.)
 
 Chinese stays everyday-focused while at beginner level (no genre tag needed).
@@ -37,8 +45,11 @@ Chinese stays everyday-focused while at beginner level (no genre tag needed).
   typically multi-char phrases/idioms. No new field for Claude, no upload/hosting, no API key. EN audio gated off (one-line flip).
 
 ## Sourcing (hybrid)
-Real seed (podcast / dictionary / HSK / Tatoeba / Inbox) → Claude expands. Each card
+Real seed (podcast / HSK / Tatoeba / Inbox) → Claude expands. Each card
 records `Source` + `Source URL`. **Inbox items (user-picked IG/YouTube) are used first.**
+The `business` and `ielts` slots usually have **no seed** in `candidates` — Claude supplies them from
+its own knowledge and records `Source` = `Claude`, `Source URL` = null. `Source` is written unvalidated
+(`notion_io.py`); `EN_SOURCES` only seeds the select options at `init`, so old labels survive.
 BBC **The English We Speak** (`candidates.bbc_phrases`) is an idiom/phrase seed — each episode title
 is itself a real phrase (e.g. "read the room"); its cards record `Source` = `BBC` (shared label).
 

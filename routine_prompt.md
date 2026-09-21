@@ -1,7 +1,7 @@
 # Daily Language-Learning Routine — Prompt
 
 You are running as a scheduled daily routine inside this repository. Your job: add
-**10 everyday English** and **10 beginner Chinese** expressions to two Notion databases,
+**30 English** (10 everyday · 10 business · 10 IELTS) and **10 beginner Chinese** expressions to two Notion databases,
 sourced from real content, with **no repeats or near-duplicates**. The Python script
 does all I/O; **you** do the language selection + expansion. Work in the repo directory.
 
@@ -14,36 +14,46 @@ does all I/O; **you** do the language selection + expansion. Work in the repo di
    - `python daily_notion.py fetch en`
    - `python daily_notion.py fetch zh`
 
-   Each prints: `today`, `target_count` (10), `avoid` (every expression already saved —
+   Each prints: `today`, `target_count` (en 30, zh 10), `avoid` (every expression already saved —
    never repeat or near-repeat these), `candidates` (raw source material), and for zh
    `current_hsk_level`.
 
 2. Build two JSON arrays of item objects — for English and Chinese — selecting from the
    candidates and expanding each into a full learning card.
 
-   **English (10 items — practical, real-use expressions across genres):**
-   - Pick expressions a learner can actually USE soon, in real conversation/writing. Prefer common,
-     currently-used wording; **avoid rare, literary, archaic, or "dictionary-word" vocabulary** — if it
-     wouldn't come up in everyday speech, work, class, or travel, skip it. Calibration anchors:
-     "fair enough", "read the room", "can I get this to-go", "let's circle back on this".
-   - **Ratio (important): ~8 of 10 must be high-frequency expressions people really say; ~2 may stretch.**
-     Do not fill the list with rare/literary words.
-   - Spread the 10 across these genres, **varied day to day** (rotate for weekly coverage — not all
-     genres every day), weighted toward the everyday end:
-     - `everyday` — casual reactions / discourse / small talk ("no worries", "my bad", "fair enough").
-     - `business` — workplace / email / meeting phrasing ("circle back", "loop someone in", "touch base").
-     - `academic` — university/class/study English ("could you elaborate on that", "to put it another way", "the data suggests").
-     - `travel` — airport / hotel / directions / getting around ("is this seat taken", "could we split the bill", "do you have any vacancies").
-     - `slang` — current, genuinely-used colloquial slang, not dated ("it's giving…", "no cap"); add a `usage_note` on register.
-     - `idiom` — common idioms/colloquialisms people actually say ("read the room", "call it a day").
+   **English (30 items — 10 per purpose, a fixed split):**
+   - **Split the 30 exactly: 10 `everyday` · 10 `business` · 10 `ielts`.** This is not a rotation —
+     every run uses this split. `academic` / `travel` / `slang` / `idiom` remain valid tags for an
+     item that naturally belongs there, but they get no reserved slots; use them inside the ten
+     `everyday` slots when they fit.
+   - **10 × `everyday`** — what people actually say in casual conversation: reactions, small talk,
+     discourse markers, and idioms that are genuinely current. Anchors: "fair enough", "my bad",
+     "read the room", "is this seat taken", "call it a day".
+   - **10 × `business`** — workplace English usable today in a meeting, an email, or a stand-up.
+     Anchors: "circle back", "loop someone in", "touch base", "align on", "I don't have the
+     bandwidth for that", "let's take this offline".
+   - **10 × `ielts`** — academic/exam vocabulary that raises a Writing or Speaking band: precise verbs
+     and nouns, linking devices, and the **collocations** they live in. Give the collocation rather
+     than the bare word whenever the word is normally used in one. Anchors: "a substantial proportion
+     of", "mitigate the impact of", "consequently", "albeit", "pose a significant challenge".
+     For these, `usage_note` must say where it earns marks (e.g. "IELTS Writing Task 2 — 원인·결과 연결").
+   - **Frequency test — applies to the 20 `everyday` + `business` items:** if you cannot picture a real
+     person saying it this month, at work or with friends, drop it and pick another. **No rare,
+     literary, or archaic vocabulary, and no dictionary-headword curiosities.** The `ielts` slots are
+     the only place formal, lower-frequency wording belongs — and even there it must be exam-useful,
+     not obscure.
+   - **The frequency test beats the count.** If you cannot find 10 genuinely common, not-yet-saved
+     items for a slot, write fewer for that slot rather than filling it with rare wording, and say
+     how many you wrote per slot in your final summary.
    - Material priority: (1) `candidates.inbox` (user-picked Instagram/YouTube — always use these
      first), (2) `candidates.bbc_phrases` (each episode title IS a real idiom/phrase) and
      `candidates.youtube` (latest uploads from everyday-English channels — the `title`/`description`
      usually name the target phrase; mine those), plus one of `candidates.bbc` / `lukes` (pick a
-     *different* primary source than recent days, for variety). **`candidates.merriam_webster` is a
-     LAST-RESORT anchor only** — its Word-of-the-Day is deliberately rare/literary, so use it sparingly
-     (if at all) and never let it pull the list toward obscure words. Use `candidates.tatoeba` for
+     *different* primary source than recent days, for variety). Use `candidates.tatoeba` for
      authentic example sentences. Candidates are seeds — prefer real, common usage over source rarity.
+   - The `business` and `ielts` slots usually have **no seed** in `candidates`. Draw those from your
+     own knowledge of current workplace usage and IELTS band-7+ vocabulary, set `source` to `Claude`,
+     and leave `source_url` null. Only claim a real source when you actually used its material.
 
    **Chinese (10 items, beginner — 기초부터):**
    - Use `candidates.hsk` words (already filtered to unused, frequency order) as the backbone;

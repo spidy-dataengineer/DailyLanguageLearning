@@ -64,7 +64,7 @@ In Claude Code on the personal PC, run `/schedule`:
 - Set env vars (from your `.env`): `NOTION_TOKEN`, `NOTION_DB_ID_EN/ZH/INBOX`, `DISCORD_WEBHOOK_URL`.
 - Prompt = the contents of `routine_prompt.md`.
 - Daily time (e.g. 08:00; minimum interval 1h).
-- Do a **one-off run** to verify: it should `review` → generate 10 EN + 10 ZH → `write` → Discord ping.
+- Do a **one-off run** to verify: it should `review` → generate 30 EN + 10 ZH → `write` → Discord ping.
 
 ## After deployment — remaining enhancements
 Increments 2–4 (pronunciation audio, cloze + reverse cards, stats) are specced in `docs/plan.md`

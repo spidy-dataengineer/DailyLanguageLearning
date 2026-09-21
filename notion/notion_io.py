@@ -113,7 +113,6 @@ def fetch(lang: str) -> None:
             "level": "EN-advanced", "styles": STYLES,
             "avoid": sorted({r["expression"] for r in rows if r["expression"]}),
             "candidates": {
-                "merriam_webster": sources.mw_word_of_the_day(),
                 "bbc": sources.bbc_six_minute(),
                 "bbc_phrases": sources.bbc_the_english_we_speak(),
                 "youtube": sources.youtube_channels(),

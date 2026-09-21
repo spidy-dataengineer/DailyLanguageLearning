@@ -13,6 +13,33 @@ def _log(msg: str) -> None:
     print(f"[daily] {msg}", file=sys.stderr)
 
 
+_LIMIT = 1990  # Discord caps a message at 2000 chars; keep a margin
+
+
+def _chunks(lines: list) -> list:
+    """Pack lines into as few messages as fit under _LIMIT, splitting only between lines."""
+    out, cur = [], ""
+    for line in lines:
+        if cur and len(cur) + 1 + len(line) > _LIMIT:
+            out.append(cur)
+            cur = line
+        else:
+            cur = f"{cur}\n{line}" if cur else line
+    if cur:
+        out.append(cur)
+    return [c[:_LIMIT] for c in out]
+
+
+def _post(url: str, lines: list, what: str) -> None:
+    """Send lines as one or more messages, in order; fail-soft, stopping at the first error."""
+    for content in _chunks(lines):
+        try:
+            requests.post(url, json={"content": content}, timeout=20).raise_for_status()
+        except requests.RequestException as e:
+            _log(f"{what} failed: {e}")
+            return
+
+
 def _stats_lines(s: dict) -> list:
     en, zh = s["by_lang"]["en"], s["by_lang"]["zh"]
     boxes: dict = {}
@@ -47,10 +74,7 @@ def notify_write(written: dict) -> None:
         db = os.environ.get(env, "")
         if db:
             lines.append(f"📖 {label}: https://www.notion.so/{db.replace('-', '')}")
-    try:
-        requests.post(url, json={"content": "\n".join(lines)[:1990]}, timeout=20).raise_for_status()
-    except requests.RequestException as e:
-        _log(f"Discord notify failed: {e}")
+    _post(url, lines, "Discord notify")
 
 
 def notify_review(due: dict, stats: dict | None = None) -> None:
@@ -69,10 +93,7 @@ def notify_review(due: dict, stats: dict | None = None) -> None:
                       for r in due[lang]]
     if stats:
         lines += [""] + _stats_lines(stats)
-    try:
-        requests.post(url, json={"content": "\n".join(lines)[:1990]}, timeout=20).raise_for_status()
-    except requests.RequestException as e:
-        _log(f"review ping failed: {e}")
+    _post(url, lines, "review ping")
 
 
 def notify_stats(s: dict) -> None:
@@ -82,7 +103,4 @@ def notify_stats(s: dict) -> None:
         _log("no DISCORD_WEBHOOK_URL; skipping stats notification")
         return
     lines = [f"📈 **학습 통계 ({s['today']})**"] + _stats_lines(s)
-    try:
-        requests.post(url, json={"content": "\n".join(lines)[:1990]}, timeout=20).raise_for_status()
-    except requests.RequestException as e:
-        _log(f"stats notify failed: {e}")
+    _post(url, lines, "stats notify")

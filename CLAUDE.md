@@ -8,7 +8,7 @@ Notion DBs** → **Discord** ping. Design docs (living source of truth): **start
 |---|---|---|
 | CLI entry / dispatch | `daily_notion.py` | — |
 | Notion API + schema + init/migrate + page layout + audio + fetch + write | `notion/notion_io.py` | `docs/notion.md` · `notion/PRINCIPLES.md` |
-| Source fetchers (MW, BBC 6-min + The English We Speak, YouTube channels, Luke's, HSK, Tatoeba) | `content/sources.py` | `docs/sources.md` · `content/PRINCIPLES.md` |
+| Source fetchers (BBC 6-min + The English We Speak, YouTube channels, Luke's, HSK, Tatoeba) | `content/sources.py` | `docs/sources.md` · `content/PRINCIPLES.md` |
 | Inbox ingestion (manual picks + auto-source roadmap) | `notion/notion_io.py` (`inbox_unprocessed`) | `docs/inbox.md` |
 | Dedup (skip same/similar) | `content/dedup.py` (`norm`, `similar`, `similar_to_any`, `hsk_candidates`) | `docs/dedup.md` · `content/PRINCIPLES.md` |
 | Review / SRS | `srs/review.py` (`due_rows`, `reschedule`, `review`) | `docs/review.md` · `srs/PRINCIPLES.md` |
