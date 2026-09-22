@@ -9,7 +9,7 @@ import sys
 from notion_client import Client
 from notion_client.helpers import collect_paginated_api
 
-from constants import INTERVALS, kst_today
+from constants import INTERVALS, REVIEW_CAP, kst_today
 from notion.notion_io import _client, _due_date, _plain, _select_name, data_source_id
 from notify.notify import notify_review
 from srs.stats import compute_stats
@@ -34,8 +34,17 @@ def due_rows(notion: Client, db_id: str) -> list:
             continue
         out.append({"page_id": r["id"], "expression": expr, "meaning_ko": meaning,
                     "box": (p.get("Box") or {}).get("number") or 1,
-                    "recall": _select_name(p.get("Recall"))})
+                    "recall": _select_name(p.get("Recall")),
+                    "next": nr, "created": _due_date(p.get("Date"))})
     return out
+
+
+def pick(rows: list, cap: int) -> list:
+    """Today's review slice: every card the user marked (a Recall must never wait in the queue) plus the
+    longest-waiting unmarked cards, up to `cap` in total. The rest stay due and come first tomorrow."""
+    marked = [r for r in rows if r["recall"]]
+    waiting = sorted((r for r in rows if not r["recall"]), key=lambda r: (r["next"] or "", r["created"] or ""))
+    return marked + waiting[:max(cap - len(marked), 0)]
 
 
 def reschedule(notion: Client, page_id: str, box: int, recall: str) -> None:
@@ -51,10 +60,14 @@ def reschedule(notion: Client, page_id: str, box: int, recall: str) -> None:
 
 def review() -> None:
     notion = _client()
-    due = {"en": [], "zh": []}
+    due, total = {"en": [], "zh": []}, {}
     for lang, env in (("en", "NOTION_DB_ID_EN"), ("zh", "NOTION_DB_ID_ZH")):
-        for row in due_rows(notion, os.environ[env]):
+        rows = due_rows(notion, os.environ[env])
+        total[lang] = len(rows)
+        for row in pick(rows, REVIEW_CAP):
             reschedule(notion, row["page_id"], row["box"], row["recall"])
             due[lang].append(row)
-    notify_review(due, compute_stats(notion))
-    print(json.dumps({"due_en": len(due["en"]), "due_zh": len(due["zh"])}, ensure_ascii=False))
+    left = total["en"] + total["zh"] - len(due["en"]) - len(due["zh"])
+    notify_review(due, compute_stats(notion), left)
+    print(json.dumps({"due_en": total["en"], "due_zh": total["zh"],
+                      "reviewed_en": len(due["en"]), "reviewed_zh": len(due["zh"])}, ensure_ascii=False))

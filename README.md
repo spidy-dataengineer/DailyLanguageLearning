@@ -31,7 +31,7 @@ Python only does I/O. The routine's own Claude reasoning turns raw material into
 - `daily_notion.py` — thin CLI entry: dispatches `init` / `fetch` / `write` / `review` / `stats` / `migrate` to the concern modules below.
 - `notion_io.py` — Notion API + schema/init/migrate + page (flashcard / practice) layout + ZH audio URLs + fetch + write.
 - `dedup.py` — string-similarity dedup (`similar`, `similar_to_any`) + HSK progression (`hsk_candidates`).
-- `review.py` — SRS (spaced repetition): find due cards, reschedule on the Leitner curve.
+- `review.py` — SRS (spaced repetition): find due cards, review up to 25/language/day (longest-waiting first), reschedule on the Leitner curve.
 - `stats.py` — read-only learning aggregates (totals / due / box distribution / HSK / streak).
 - `notify.py` — Discord webhook senders (`notify_write` / `notify_review` / `notify_stats`).
 - `sources.py` — source fetchers: BBC 6 Minute English (+transcript), BBC The English We Speak (idioms/phrases), everyday-English YouTube channels (`YT_CHANNELS`), Luke's English Podcast, HSK list, Tatoeba.

@@ -7,7 +7,7 @@ Code: `notify/notify.py`. Three senders + one shared formatter, all using a sing
 | Function | Caller | When it fires |
 |---|---|---|
 | `notify_write(written)` | `notion_io.write` | After daily `write` succeeds — lists today's new EN/ZH cards with meanings visible. Footer: links to each DB. |
-| `notify_review(due, stats)` | `review.review` | Daily SRS review — lists due cards with meanings hidden as `\|\|spoilers\|\|`. Footer: `_stats_lines`. |
+| `notify_review(due, stats, left)` | `review.review` | Daily SRS review — lists today's capped slice with meanings hidden as `\|\|spoilers\|\|`; header shows `left` (held back for later days). Footer: `_stats_lines`. |
 | `notify_stats(s)` | `stats.stats` | On-demand stats CLI — pure aggregate summary. |
 
 All three:
@@ -16,7 +16,8 @@ All three:
 - Split into as many messages as needed, **only between lines**, each ≤1990 chars (Discord's 2000-char
   limit, with margin) — `_chunks` / `_post`. A 30 EN + 10 ZH day no longer fits one message; the old
   single-message truncation silently cut off the Chinese list and the Notion links.
-- Fail-soft: `RequestException` is caught and logged; the routine continues. A multi-part ping stops at
+- Fail-soft: `RequestException` is caught and logged — **status code only** (e.g. `429`), never the
+  exception text, because `requests` embeds the full webhook URL (the secret) in it; the routine continues. A multi-part ping stops at
   the first failed part so later parts never arrive out of order.
 
 ## Shared formatter — `_stats_lines(s)`

@@ -3,7 +3,8 @@
 `notify.py`: three one-way Discord webhook pings — daily write summary, SRS review, stats.
 
 - **One-way only**: feedback never flows back through Discord — it flows through Notion `Recall`.
-- Never print/post the webhook URL; skip silently if `DISCORD_WEBHOOK_URL` is unset.
+- Never print/post the webhook URL — error logs carry only the HTTP status, since `requests`' exception
+  text embeds the URL; skip silently if `DISCORD_WEBHOOK_URL` is unset.
 - Meanings are hidden as `||spoilers||` in the review ping (active recall); long pings split across several messages between lines, each ≤1990 chars (`_chunks`).
 
 Detail → [../docs/notify.md](../docs/notify.md)

@@ -36,7 +36,8 @@ def _post(url: str, lines: list, what: str) -> None:
         try:
             requests.post(url, json={"content": content}, timeout=20).raise_for_status()
         except requests.RequestException as e:
-            _log(f"{what} failed: {e}")
+            # never log the exception text: requests embeds the full webhook URL (the secret) in it
+            _log(f"{what} failed: {e.response.status_code if e.response is not None else type(e).__name__}")
             return
 
 
@@ -77,14 +78,16 @@ def notify_write(written: dict) -> None:
     _post(url, lines, "Discord notify")
 
 
-def notify_review(due: dict, stats: dict | None = None) -> None:
-    """Discord ping for SRS review: due cards with meanings hidden as ||spoilers||."""
+def notify_review(due: dict, stats: dict | None = None, left: int = 0) -> None:
+    """Discord ping for SRS review: today's capped slice with meanings hidden as ||spoilers||;
+    `left` = due cards held back for later days."""
     url = os.environ.get("DISCORD_WEBHOOK_URL")
     n = len(due["en"]) + len(due["zh"])
     if not url or n == 0:
         _log("review: nothing due or no webhook; skipping ping")
         return
-    lines = [f"🧠 **복습 ({kst_today().isoformat()}) — {n}개** · 뜻은 ||가림||, 기억했으면 Notion에서 Recall 표시"]
+    lines = [f"🧠 **복습 ({kst_today().isoformat()}) — {n}개** · 뜻은 ||가림||, 기억했으면 Notion에서 Recall 표시"
+             + (f" · 밀린 {left}개는 다음 날부터" if left else "")]
     for lang, flag in (("en", "🇬🇧 English"), ("zh", "🇨🇳 中文")):
         if due[lang]:
             lines += ["", f"**{flag}**"]

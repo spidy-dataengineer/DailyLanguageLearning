@@ -5,6 +5,8 @@
 - Leitner boxes 1–5, intervals **1/3/7/16/35 days** (`INTERVALS`). `Recall` (Got it/Forgot) is the only
   field the user marks; the next `review` run reschedules accordingly.
 - "today" = **KST** (`kst_today`); due = `Next review` empty or ≤ today.
+- **Daily cap** (`REVIEW_CAP` per language): marked cards always processed; unmarked ones longest-waiting
+  first up to the cap (`pick`); the rest stay due untouched and lead the next run.
 - Stats are **read-only** — derived from existing rows, no dashboard DB, no extra writes.
 - Both import Notion helpers from `notion.notion_io`; neither generates or mutates card content.
 

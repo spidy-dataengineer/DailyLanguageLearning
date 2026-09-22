@@ -11,7 +11,7 @@ Notion DBs** → **Discord** ping. Design docs (living source of truth): **start
 | Source fetchers (BBC 6-min + The English We Speak, YouTube channels, Luke's, HSK, Tatoeba) | `content/sources.py` | `docs/sources.md` · `content/PRINCIPLES.md` |
 | Inbox ingestion (manual picks + auto-source roadmap) | `notion/notion_io.py` (`inbox_unprocessed`) | `docs/inbox.md` |
 | Dedup (skip same/similar) | `content/dedup.py` (`norm`, `similar`, `similar_to_any`, `hsk_candidates`) | `docs/dedup.md` · `content/PRINCIPLES.md` |
-| Review / SRS | `srs/review.py` (`due_rows`, `reschedule`, `review`) | `docs/review.md` · `srs/PRINCIPLES.md` |
+| Review / SRS | `srs/review.py` (`due_rows`, `pick`, `reschedule`, `review`) | `docs/review.md` · `srs/PRINCIPLES.md` |
 | Stats (read-only aggregates) | `srs/stats.py` (`compute_stats`, `_streak`, `stats`) | `docs/stats.md` |
 | Discord notifications | `notify/notify.py` (`notify_write`, `notify_review`, `notify_stats`) | `docs/notify.md` · `notify/PRINCIPLES.md` |
 | Shared constants | `constants.py` (STYLES, TARGETS, SIM_THRESHOLD, INTERVALS, …) — repo root | — |
