@@ -7,6 +7,7 @@ Modes:
   python daily_notion.py review                                           # SRS: surface due cards, reschedule
   python daily_notion.py stats                                            # read-only aggregates -> JSON + Discord
   python daily_notion.py migrate                                          # ensure SRS properties on existing DBs
+  python daily_notion.py check-env                                        # which required env vars are set (names + lengths only)
 
 Python only does I/O (gather + write). The /schedule routine's own Claude reasoning turns the
 fetched raw material into the day's items (see routine_prompt.md). Code is split by concern:
@@ -20,11 +21,27 @@ fetched raw material into the day's items (see routine_prompt.md). Code is split
 """
 from __future__ import annotations
 
+import json
+import os
 import sys
 
+from constants import REQUIRED_ENV
 from notion.notion_io import fetch, init, migrate, write
 from srs.review import review
 from srs.stats import stats
+
+
+def check_env() -> None:
+    """Report which of REQUIRED_ENV are set, as names + lengths only; exit 1 when any is missing.
+
+    The routine's Claude must use this instead of guessing variable names (it once looked for
+    NOTION_EN_DB_ID, found nothing, and stopped the whole run).
+    """
+    present = {name: len(os.environ[name]) for name in REQUIRED_ENV if os.environ.get(name)}
+    missing = [name for name in REQUIRED_ENV if name not in present]
+    print(json.dumps({"ok": not missing, "missing": missing, "present": present}))
+    if missing:
+        raise SystemExit(1)
 
 
 def main(argv) -> None:
@@ -44,6 +61,8 @@ def main(argv) -> None:
         if len(argv) < 3:
             raise SystemExit("usage: daily_notion.py fetch <en|zh>")
         fetch(argv[2])
+    elif cmd == "check-env":
+        check_env()
     elif cmd == "migrate":
         migrate()
     elif cmd == "review":

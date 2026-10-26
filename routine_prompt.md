@@ -5,6 +5,15 @@ You are running as a scheduled daily routine inside this repository. Your job: a
 sourced from real content, with **no repeats or near-duplicates**. The Python script
 does all I/O; **you** do the language selection + expansion. Work in the repo directory.
 
+## Required environment variables (exact names)
+
+`NOTION_TOKEN`, `NOTION_DB_ID_EN`, `NOTION_DB_ID_ZH`, `NOTION_DB_ID_INBOX`, `DISCORD_WEBHOOK_URL`.
+
+Check them **only** with `python daily_notion.py check-env` (prints names + lengths, never values).
+Do not look for any other variable name and do not guess names such as `NOTION_EN_DB_ID` — they do not
+exist. Continue when it prints `"ok": true`; if it lists a name under `missing`, stop and report
+exactly that name.
+
 ## Steps
 
 0. **Run `python daily_notion.py review` first** and report its output — it reschedules due cards

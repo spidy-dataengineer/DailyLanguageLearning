@@ -9,7 +9,7 @@ routine clones each run.
 monitoring/policy concern); covert workarounds were declined. Plan:
 1. Copy the project folder + `.env` to a personal computer.
 2. Push to a **private GitHub repo** there.
-3. `/schedule`: point at the repo, set env vars from `.env`, paste `routine_prompt.md` as the prompt,
+3. `/schedule`: point at the repo, set env vars from `.env` (exact names: `NOTION_TOKEN`, `NOTION_DB_ID_EN`, `NOTION_DB_ID_ZH`, `NOTION_DB_ID_INBOX`, `DISCORD_WEBHOOK_URL`; `python daily_notion.py check-env` verifies them without printing values), paste `routine_prompt.md` as the prompt,
    pick a daily time (min interval 1h). Verify with a one-off run.
 
 ## Alternatives (no GitHub)

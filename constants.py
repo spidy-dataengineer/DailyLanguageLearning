@@ -8,6 +8,8 @@ TARGETS = {"en": 30, "zh": 10}
 SIM_THRESHOLD = 0.85
 MAX_HSK_LEVEL = 6
 INTERVALS = {1: 1, 2: 3, 3: 7, 4: 16, 5: 35}
+# Exact names of the environment variables the routine needs (values are never printed; see check-env).
+REQUIRED_ENV = ["NOTION_TOKEN", "NOTION_DB_ID_EN", "NOTION_DB_ID_ZH", "NOTION_DB_ID_INBOX", "DISCORD_WEBHOOK_URL"]
 REVIEW_CAP = 25  # unmarked cards reviewed per language per day; the rest stay due, longest-waiting first
 
 # All "today" stamps use Korea time. The cloud routine runs in UTC, so a plain

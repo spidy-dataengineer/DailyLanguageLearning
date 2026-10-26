@@ -35,7 +35,7 @@ overview; this file stays the index.
 - Secrets + DB IDs live in `.env` (gitignored) — never commit; never print the token/webhook value.
 - Notion uses the **2025-09-03 data-source model** (notion-client 3.1.0): `data_sources.query`,
   `pages.create(parent=data_source_id)`; resolve via `data_source_id(db_id)`.
-- CLI: `python daily_notion.py init <en_page> <zh_page> [inbox_page] | migrate | review | stats | fetch <en|zh> | write <en.json> <zh.json>`.
+- CLI: `python daily_notion.py init <en_page> <zh_page> [inbox_page] | migrate | review | stats | check-env | fetch <en|zh> | write <en.json> <zh.json>`.
 
 ## Workflow discipline
 On every change that adds, edits, or deletes files, follow this loop:
