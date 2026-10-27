@@ -10,6 +10,10 @@ MAX_HSK_LEVEL = 6
 INTERVALS = {1: 1, 2: 3, 3: 7, 4: 16, 5: 35}
 # Exact names of the environment variables the routine needs (values are never printed; see check-env).
 REQUIRED_ENV = ["NOTION_TOKEN", "NOTION_DB_ID_EN", "NOTION_DB_ID_ZH", "NOTION_DB_ID_INBOX", "DISCORD_WEBHOOK_URL"]
+# sns-classifier's "중국어 저장게시물" DB: its new posts become extra Chinese cards on top of TARGETS["zh"].
+SNS_ZH_DB_ID = "3325aa0acd6948e5b238ce0e83201ec8"
+SNS_DAYS = 7  # posts saved this many days back are offered until a card cites them
+SNS_TEXT_MAX = 3000  # chars of OCR text + transcript per post
 REVIEW_CAP = 25  # unmarked cards reviewed per language per day; the rest stay due, longest-waiting first
 
 # All "today" stamps use Korea time. The cloud routine runs in UTC, so a plain

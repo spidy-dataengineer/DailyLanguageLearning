@@ -26,7 +26,7 @@ exactly that name.
 
    Each prints: `today`, `target_count` (en 30, zh 10), `saved_count` (how many expressions are
    already saved — the list itself is not printed; step 3 checks your picks against it),
-   `candidates` (raw source material), and for zh `current_hsk_level`.
+   `candidates` (raw source material), and for zh `current_hsk_level` and `candidates.sns`.
 
 2. Choose the day's expressions for English and Chinese from the candidates (rules below);
    steps 3–4 check them and expand each into a full learning card.
@@ -86,6 +86,15 @@ exactly that name.
      the day's Chinese words into 3–4 very simple sentences (beginner-level):
      `{"type": "practice", "sentences": [{"zh": "我爸爸的爱好是看书。", "pinyin": "wǒ bàba de àihào shì kàn shū", "ko": "우리 아빠의 취미는 독서야."}, ...]}`.
      Use as many of the day's words as fit naturally. (English array has no practice object.)
+   - **SNS posts — EXTRA cards, on top of the 10:** `candidates.sns` lists Chinese-study posts the
+     user saved on Instagram/YouTube (`title`, `summary`, `tags`, and `text` = on-screen text + video
+     transcript; the transcript is machine-made, so trust the Chinese characters in `summary`/`text`
+     over garbled 한글 sound-spellings). From each post take the expressions it actually teaches —
+     **up to 5 per post**, the most useful first; skip a post that names no expression. Any level
+     (not limited to `current_hsk_level`; set `level` to the closest `HSK1`–`HSK6`). Set `source` to
+     `Instagram` or `YouTube` (from `link`) and `source_url` to the post's `link` — that is what marks
+     the post as used. Run them through step 3 like every pick; they do not count toward the 10 and
+     are not woven into the practice object.
 
    **Inbox items:** extract the single most useful expression from the link / `raw_text`; set
    `source` to `Instagram` or `YouTube` (based on the link), `source_url` to the link, and

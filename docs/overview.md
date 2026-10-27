@@ -9,7 +9,7 @@ fetch (Python, I/O) → generate (routine Claude) → write (Python, I/O) → Di
 ```
 - **review** — manual only since 2026-10-27 (the Language Quiz app's sync schedules reviews now): resurface due cards on the forgetting curve + an active-recall Discord ping (with a stats footer). See [review](review.md).
 - **stats** — (on-demand) read-only learning aggregates → JSON + Discord summary. See [stats](stats.md).
-- **fetch** — gather real source material + `saved_count`. No judgment.
+- **fetch** — gather real source material + `saved_count`. No judgment. zh also lists `sns`: posts the sns-classifier saved to "중국어 저장게시물" in the last 7 days that no card cites yet (since 2026-10-27; they become extra cards on top of the 10).
 - **check** — sort the routine's picks into already-saved / shares-a-word / clear (`content/dedup.py`).
 - **generate** — the scheduled routine's own Claude turns raw material into 30 EN + 10 ZH cards
   (+ 1 Chinese practice entry), honoring level/style/dedup rules. See [generation](generation.md).

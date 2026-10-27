@@ -20,7 +20,8 @@ from notion_client import Client
 from notion_client.helpers import collect_paginated_api
 
 from content import sources
-from constants import EN_SOURCES, MAX_HSK_LEVEL, STYLES, TARGETS, ZH_SOURCES, kst_today, period_labels
+from constants import (EN_SOURCES, MAX_HSK_LEVEL, SNS_DAYS, SNS_TEXT_MAX, SNS_ZH_DB_ID, STYLES, TARGETS,
+                       ZH_SOURCES, kst_today, period_labels)
 from content.dedup import similar_to_any
 from notify.notify import notify_write
 
@@ -78,7 +79,8 @@ def existing_rows(notion: Client, db_id: str):
     ds = data_source_id(notion, db_id)
     rows = collect_paginated_api(notion.data_sources.query, data_source_id=ds)
     return [{"expression": _plain(r.get("properties", {}).get("Expression")),
-             "level": _select_name(r.get("properties", {}).get("Level"))} for r in rows]
+             "level": _select_name(r.get("properties", {}).get("Level")),
+             "source_url": (r.get("properties", {}).get("Source URL") or {}).get("url")} for r in rows]
 
 
 def inbox_unprocessed(notion: Client, language: str):
@@ -96,6 +98,33 @@ def inbox_unprocessed(notion: Client, language: str):
             "link": (p.get("Link") or {}).get("url") or "",
             "raw_text": _plain(p.get("Raw text")),
             "note": _plain(p.get("Note")),
+        })
+    return out
+
+
+def sns_unused(notion: Client, used_urls: set) -> list:
+    """Chinese-study posts the sns-classifier saved in the last SNS_DAYS days that no card cites yet.
+
+    A card made from a post keeps the post's link in `Source URL`, so a used post drops out on its own.
+    """
+    ds = data_source_id(notion, SNS_ZH_DB_ID)
+    since = (kst_today() - dt.timedelta(days=SNS_DAYS)).isoformat()
+    flt = {"timestamp": "created_time", "created_time": {"on_or_after": since}}
+    out = []
+    for r in collect_paginated_api(notion.data_sources.query, data_source_id=ds, filter=flt):
+        p = r.get("properties", {})
+        link = (p.get("Source URL") or {}).get("url")
+        if not link or link in used_urls:
+            continue
+        # The page body holds the post's OCR text and video transcript as code blocks.
+        blocks = collect_paginated_api(notion.blocks.children.list, block_id=r["id"])
+        body = "\n".join("".join(t["plain_text"] for t in b["code"]["rich_text"]) for b in blocks if b["type"] == "code")
+        out.append({
+            "link": link,
+            "title": _plain(p.get("제목")),
+            "summary": _plain(p.get("한글설명")),
+            "tags": _plain(p.get("태그")),
+            "text": body[:SNS_TEXT_MAX],
         })
     return out
 
@@ -132,6 +161,7 @@ def fetch(lang: str) -> None:
                 "hsk": hsk,
                 "tatoeba": sources.tatoeba_samples("cmn", contains=[w["simplified"] for w in hsk], n=12),
                 "inbox": inbox_unprocessed(notion, "Chinese"),
+                "sns": sns_unused(notion, {r["source_url"] for r in rows if r["source_url"]}),
             },
         }
     else:
