@@ -111,7 +111,7 @@ def fetch(lang: str) -> None:
         out = {
             "language": "en", "today": today, "target_count": TARGETS["en"],
             "level": "EN-advanced", "styles": STYLES,
-            "avoid": sorted({r["expression"] for r in rows if r["expression"]}),
+            "saved_count": len({r["expression"] for r in rows if r["expression"]}),
             "candidates": {
                 "bbc": sources.bbc_six_minute(),
                 "bbc_phrases": sources.bbc_the_english_we_speak(),
@@ -127,7 +127,7 @@ def fetch(lang: str) -> None:
         out = {
             "language": "zh", "today": today, "target_count": TARGETS["zh"],
             "current_hsk_level": level, "styles": STYLES,
-            "avoid": sorted({r["expression"] for r in rows if r["expression"]}),
+            "saved_count": len({r["expression"] for r in rows if r["expression"]}),
             "candidates": {
                 "hsk": hsk,
                 "tatoeba": sources.tatoeba_samples("cmn", contains=[w["simplified"] for w in hsk], n=12),
@@ -137,6 +137,22 @@ def fetch(lang: str) -> None:
     else:
         raise SystemExit("fetch arg must be 'en' or 'zh'")
     print(json.dumps(out, ensure_ascii=False, indent=2))
+
+
+# --- check mode --------------------------------------------------------------
+
+def check(lang: str, path: str) -> None:
+    """Sort candidate expressions (a JSON array of strings or item objects) against the saved rows."""
+    from content.dedup import check_candidates
+    if lang not in ("en", "zh"):
+        raise SystemExit("check arg must be 'en' or 'zh'")
+    with open(path, encoding="utf-8") as f:
+        raw = json.load(f)
+    cands = [((c.get("expression") if isinstance(c, dict) else c) or "").strip() for c in raw]
+    cands = [c for c in cands if c]
+    db_env = "NOTION_DB_ID_EN" if lang == "en" else "NOTION_DB_ID_ZH"
+    saved = sorted({r["expression"] for r in existing_rows(_client(), os.environ[db_env]) if r["expression"]})
+    print(json.dumps(check_candidates(cands, saved), ensure_ascii=False, indent=2))
 
 
 # --- audio URLs (pronunciation) ----------------------------------------------

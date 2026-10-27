@@ -23,12 +23,12 @@ exactly that name.
    - `python daily_notion.py fetch en`
    - `python daily_notion.py fetch zh`
 
-   Each prints: `today`, `target_count` (en 30, zh 10), `avoid` (every expression already saved —
-   never repeat or near-repeat these), `candidates` (raw source material), and for zh
-   `current_hsk_level`.
+   Each prints: `today`, `target_count` (en 30, zh 10), `saved_count` (how many expressions are
+   already saved — the list itself is not printed; step 3 checks your picks against it),
+   `candidates` (raw source material), and for zh `current_hsk_level`.
 
-2. Build two JSON arrays of item objects — for English and Chinese — selecting from the
-   candidates and expanding each into a full learning card.
+2. Choose the day's expressions for English and Chinese from the candidates (rules below);
+   steps 3–4 check them and expand each into a full learning card.
 
    **English (30 items — 10 per purpose, a fixed split):**
    - **Split the 30 exactly: 10 `everyday` · 10 `business` · 10 `ielts`.** This is not a rotation —
@@ -86,19 +86,35 @@ exactly that name.
      `{"type": "practice", "sentences": [{"zh": "我爸爸的爱好是看书。", "pinyin": "wǒ bàba de àihào shì kàn shū", "ko": "우리 아빠의 취미는 독서야."}, ...]}`.
      Use as many of the day's words as fit naturally. (English array has no practice object.)
 
-   **Both languages — DEDUP (critical):** Do NOT output any expression that is the same as, OR
-   similar to, anything in `avoid`. "Similar" includes morphological variants
-   (take off / taking off / took off) and semantic near-duplicates (synonyms, the same idiom
-   reworded). If a candidate collides with `avoid`, **skip it and choose another** — extra
-   candidates are provided for exactly this reason.
-
    **Inbox items:** extract the single most useful expression from the link / `raw_text`; set
    `source` to `Instagram` or `YouTube` (based on the link), `source_url` to the link, and
    `inbox_page_id` to that row's `inbox_page_id` so the script marks it processed.
 
-3. Write the arrays to `en_items.json` and `zh_items.json` in the repo (UTF-8).
+   **Pick before you write cards:** first choose the expressions only — about 1.5× the target
+   (≈45 English, ≈15 Chinese) — then run step 3, and only expand the survivors into full cards.
 
-4. Run: `python daily_notion.py write en_items.json zh_items.json`
+3. **DEDUP (critical) — check your picks against everything already saved:**
+   write the picked expressions as a JSON array of strings to `en_check.json` / `zh_check.json`, then run
+   - `python daily_notion.py check en en_check.json`
+   - `python daily_notion.py check zh zh_check.json`
+
+   Each prints three lists:
+   - `duplicates` — already saved (the `matches` show which). **Drop these.** The write step would
+     skip them anyway.
+   - `check_meaning` — not a string match, but shares a word with the saved expressions in
+     `related`. **You decide:** drop it if it is the same expression in another form
+     (take off / taking off / took off, pull your weight / pull one's weight) or a near-synonym /
+     reworded version of one in `related`; keep it if it only shares an ordinary word.
+   - `clear` — nothing close is saved. Keep.
+
+   Replace what you dropped with new picks and run `check` again on just the replacements, until
+   you have the target count (or the frequency rule above says to write fewer).
+   Your picks must also not repeat each other — `check` flags repeats inside the list as `duplicates`.
+
+4. Expand the kept picks into the item objects and write the arrays to `en_items.json` and
+   `zh_items.json` in the repo (UTF-8).
+
+5. Run: `python daily_notion.py write en_items.json zh_items.json`
    It creates the rows, marks processed inbox items, and posts the Discord summary. Report its output.
 
 ## Item schema (each object in the arrays)

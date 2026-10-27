@@ -19,7 +19,8 @@ can be off.
 ## How it works
 
 ```
-fetch (Python)        → gathers real source material + the "avoid" list  → JSON
+fetch (Python)        → gathers real source material + saved_count      → JSON
+check (Python)        → which picks are already saved or look related     → JSON
 generate (routine AI) → picks & expands into 30 EN + 10 ZH cards         → en_items.json / zh_items.json
 write (Python)        → creates Notion rows, marks inbox done, Discord ping
 ```
@@ -91,7 +92,8 @@ the auto-collection roadmap (YouTube-channel / RSS creators): [docs/inbox.md](do
 ## Dedup (the "skip if similar" logic)
 1. **Python pre-filter** (`fetch`) — normalizes existing expressions and drops near-identical
    seed candidates; over-provides candidates so the AI can pick alternatives.
-2. **AI semantic skip** (`generate`) — given the full `avoid` list and told to skip morphological
+2. **AI semantic skip** (`check`) — the AI runs `daily_notion.py check` on its picks and judges
+   only the saved expressions that share a word with each pick, skipping morphological
    variants (take off / taking off) and semantic near-duplicates.
 3. **Python safety net** (`write`) — re-checks each item against existing rows (exact / case /
    punctuation / containment / reordering / high string-similarity) and skips collisions.

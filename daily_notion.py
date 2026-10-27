@@ -3,6 +3,7 @@
 Modes:
   python daily_notion.py init <en_page_id> <zh_page_id> [inbox_page_id]   # create the 3 databases
   python daily_notion.py fetch <en|zh>                                    # gather raw material -> JSON on stdout
+  python daily_notion.py check <en|zh> <candidates.json>                  # which candidates are already saved
   python daily_notion.py write <en_items.json> <zh_items.json>            # create rows + notify
   python daily_notion.py review                                           # SRS: surface due cards, reschedule
   python daily_notion.py stats                                            # read-only aggregates -> JSON + Discord
@@ -26,7 +27,7 @@ import os
 import sys
 
 from constants import REQUIRED_ENV
-from notion.notion_io import fetch, init, migrate, write
+from notion.notion_io import check, fetch, init, migrate, write
 from srs.review import review
 from srs.stats import stats
 
@@ -61,6 +62,10 @@ def main(argv) -> None:
         if len(argv) < 3:
             raise SystemExit("usage: daily_notion.py fetch <en|zh>")
         fetch(argv[2])
+    elif cmd == "check":
+        if len(argv) < 4:
+            raise SystemExit("usage: daily_notion.py check <en|zh> <candidates.json>")
+        check(argv[2], argv[3])
     elif cmd == "check-env":
         check_env()
     elif cmd == "migrate":

@@ -9,7 +9,8 @@ fetch (Python, I/O) → generate (routine Claude) → write (Python, I/O) → Di
 ```
 - **review** — (run first each day) resurface due cards on the forgetting curve + an active-recall Discord ping (with a stats footer). See [review](review.md).
 - **stats** — (on-demand) read-only learning aggregates → JSON + Discord summary. See [stats](stats.md).
-- **fetch** — gather real source material + the `avoid` list (already-saved expressions). No judgment.
+- **fetch** — gather real source material + `saved_count`. No judgment.
+- **check** — sort the routine's picks into already-saved / shares-a-word / clear (`content/dedup.py`).
 - **generate** — the scheduled routine's own Claude turns raw material into 30 EN + 10 ZH cards
   (+ 1 Chinese practice entry), honoring level/style/dedup rules. See [generation](generation.md).
 - **write** — create Notion rows + flashcard page bodies, mark inbox processed, Discord ping.
