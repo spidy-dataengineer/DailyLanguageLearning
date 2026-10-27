@@ -16,8 +16,9 @@ exactly that name.
 
 ## Steps
 
-0. **Run `python daily_notion.py review` first** and report its output — it reschedules due cards
-   (forgetting curve) and posts the active-recall review ping. Then continue with new items below.
+0. **Do not run `python daily_notion.py review`.** Review scheduling (`Box`, `Recall`, `Next review`)
+   now belongs to the Language Quiz app and its sync; running `review` here would count the app's
+   answers a second time. Start at step 1.
 
 1. Run these and read each one's JSON stdout:
    - `python daily_notion.py fetch en`

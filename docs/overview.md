@@ -7,7 +7,7 @@ sources, write them as **flashcards** into two separate Notion databases, and no
 ```
 fetch (Python, I/O) → generate (routine Claude) → write (Python, I/O) → Discord notify
 ```
-- **review** — (run first each day) resurface due cards on the forgetting curve + an active-recall Discord ping (with a stats footer). See [review](review.md).
+- **review** — manual only since 2026-10-27 (the Language Quiz app's sync schedules reviews now): resurface due cards on the forgetting curve + an active-recall Discord ping (with a stats footer). See [review](review.md).
 - **stats** — (on-demand) read-only learning aggregates → JSON + Discord summary. See [stats](stats.md).
 - **fetch** — gather real source material + `saved_count`. No judgment.
 - **check** — sort the routine's picks into already-saved / shares-a-word / clear (`content/dedup.py`).

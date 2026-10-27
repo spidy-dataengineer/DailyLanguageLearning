@@ -2,6 +2,15 @@
 
 Code: `srs/review.py` (`due_rows`, `pick`, `reschedule`, `review`). Schema migration in `notion/notion_io.py` (`migrate`).
 
+> **2026-10-27: the daily routine no longer runs `review`.** The Language Quiz app
+> (`spidy-dataengineer/Language-Study-In-Between-Tasks`) owns review scheduling: app answers →
+> `progress/*.jsonl` → its sync (every 8 hours) writes `Box` / `Recall` / `Last reviewed` / `Next review`
+> (intervals 1/2/4/8/16 days). Running both clashes: the sync has already raised `Box` and left
+> `Recall = Got it`, so `review` would raise `Box` again on that mark, and it pushes 25 unanswered due
+> cards per language per day out of the app's queue. Decided after the first phone → GitHub → Notion
+> answer landed on 2026-10-27. The Discord review ping goes with it (the app's reminders replace it).
+> The code stays for manual use; the rest of this page describes it as it was.
+
 Each saved **vocab** card is reviewed on a forgetting curve. Practice rows (📝) are excluded.
 
 ## Scheme (Leitner, fixed intervals)
