@@ -2,6 +2,8 @@
 
 Code: `srs/review.py` (`due_rows`, `pick`, `reschedule`, `review`). Schema migration in `notion/notion_io.py` (`migrate`).
 
+> **2026-11-03: review state moved to the app's Supabase, per learner. Notion `Box` / `Recall` / `Last reviewed` / `Next review` are no longer updated.** The note below is history; still don't run `review`.
+>
 > **2026-10-27: the daily routine no longer runs `review`.** The Language Quiz app
 > (`spidy-dataengineer/Language-Study-In-Between-Tasks`) owns review scheduling: app answers →
 > `progress/*.jsonl` → its sync (every 8 hours) writes `Box` / `Recall` / `Last reviewed` / `Next review`
