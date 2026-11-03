@@ -6,6 +6,7 @@ never breaks the daily run. No Notion access here (that lives in daily_notion.py
 """
 from __future__ import annotations
 
+import gzip
 import os
 import random
 import re
@@ -177,27 +178,74 @@ def hsk_level_words(level: int):
 
 # --- Tatoeba (shared) --------------------------------------------------------
 
-def tatoeba_samples(lang: str, contains=None, n: int = 5):
-    """Sample real example sentences from a local Tatoeba subset.
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")  # built by prepare_sources.py
+TATOEBA_URL = "https://tatoeba.org/en/sentences/show/{}"
+_tatoeba_cache: dict[str, list] = {}
 
-    Reads data/tatoeba_<lang>.tsv (lang = 'eng' or 'cmn'); each line ends with the
-    sentence text. Returns [] if the file is absent (see prepare_tatoeba.py / README).
-    """
-    path = os.path.join(os.path.dirname(__file__), "data", f"tatoeba_{lang}.tsv")
-    if not os.path.exists(path):
-        return []
+
+def _tatoeba(lang: str) -> list:
+    """[{text, url}, ...] from data/tatoeba_<lang>.tsv (lang = 'eng' or 'cmn'); the url credits the sentence's author."""
+    if lang not in _tatoeba_cache:
+        rows = []
+        try:
+            with open(os.path.join(DATA_DIR, f"tatoeba_{lang}.tsv"), encoding="utf-8") as f:
+                for line in f:
+                    sid, _, text = line.rstrip("\n").partition("\t")
+                    if text:
+                        rows.append({"text": text, "url": TATOEBA_URL.format(sid)})
+        except OSError as e:
+            _log(f"Tatoeba read failed: {e}")
+        _tatoeba_cache[lang] = rows
+    return _tatoeba_cache[lang]
+
+
+def tatoeba_samples(lang: str, contains=None, n: int = 5):
+    """Random real sentences, optionally only those containing one of the given strings (Chinese words)."""
+    rows = _tatoeba(lang)
+    if contains:
+        rows = [r for r in rows if any(w and w in r["text"] for w in contains)]
+    return random.sample(rows, min(n, len(rows)))
+
+
+def tatoeba_with_word(forms, n: int = 5):
+    """Random English sentences using one of these word forms as a whole word (art must not match start)."""
+    wanted = set(forms)
+    rows = [r for r in _tatoeba("eng") if wanted & set(re.findall(r"[a-z']+", r["text"].lower()))]
+    return random.sample(rows, min(n, len(rows)))
+
+
+# --- English word lists (TSL: TOEIC, NAWL: academic) -----------------------------
+
+def english_wordlist(name: str) -> list:
+    """[{word, forms}, ...] for list 'TSL' or 'NAWL' from data/wordlist_en.tsv."""
+    words = []
     try:
-        matches = []
-        with open(path, encoding="utf-8") as f:
+        with open(os.path.join(DATA_DIR, "wordlist_en.tsv"), encoding="utf-8") as f:
             for line in f:
-                text = line.rstrip("\n").split("\t")[-1].strip()
-                if not text:
-                    continue
-                if contains and not any(w and w in text for w in contains):
-                    continue
-                matches.append(text)
-        random.shuffle(matches)
-        return matches[:n]
+                list_name, word, forms = line.rstrip("\n").split("\t")
+                if list_name == name:
+                    words.append({"word": word, "forms": forms.split(",")})
     except OSError as e:
-        _log(f"Tatoeba read failed: {e}")
-        return []
+        _log(f"Word list read failed: {e}")
+    return words
+
+
+# --- CC-CEDICT ---------------------------------------------------------------
+
+_cedict_cache: dict[str, list] = {}
+_CEDICT_LINE = re.compile(r"\S+ (\S+) \[([^\]]+)\] /(.+)/")
+
+
+def cedict_readings(word: str) -> list:
+    """[{pinyin, meanings}, ...] for a simplified word; [] when the dictionary doesn't have it (phrases often)."""
+    if not _cedict_cache:
+        try:
+            with gzip.open(os.path.join(DATA_DIR, "cedict.txt.gz"), "rt", encoding="utf-8") as f:
+                for line in f:
+                    m = _CEDICT_LINE.match(line)
+                    if m:
+                        _cedict_cache.setdefault(m.group(1), []).append(
+                            {"pinyin": m.group(2), "meanings": m.group(3).split("/")[:6]})
+        except OSError as e:
+            _log(f"CC-CEDICT read failed: {e}")
+    return _cedict_cache.get(word, [])

@@ -58,9 +58,7 @@ Python only does I/O. The routine's own Claude reasoning turns raw material into
 3. **Discord webhook** — Discord channel → Edit Channel → Integrations → Webhooks →
    New Webhook → Copy URL → `DISCORD_WEBHOOK_URL`.
 
-4. *(optional)* **Tatoeba** — download per-language sentence files from
-   https://tatoeba.org/en/downloads and save a subset as `data/tatoeba_eng.tsv` and
-   `data/tatoeba_cmn.tsv` (tab-separated, sentence text in the last column). Absent = skipped.
+4. **Tatoeba, TSL/NAWL, CC-CEDICT** — already in `content/data/`; `docs/sources.md` says how to refresh them.
 
 ## Local test (before scheduling)
 ```

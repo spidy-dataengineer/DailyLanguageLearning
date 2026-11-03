@@ -7,6 +7,7 @@ and >=threshold string similarity. Does NOT try to catch morphological inflectio
 from __future__ import annotations
 
 import difflib
+import random
 import re
 import sys
 
@@ -121,3 +122,11 @@ def hsk_candidates(existing_zh, n: int = 8):
         if unused:
             return level, unused[:n]
     return MAX_HSK_LEVEL, []
+
+
+def wordlist_candidates(existing_en, name: str, n: int = 20):
+    """Random words of a list (TSL / NAWL) with no card of their own yet, each with real sentences to draw on."""
+    saved = {norm(r["expression"]).removeprefix("to ") for r in existing_en}
+    unused = [w for w in sources.english_wordlist(name) if not saved & set(w["forms"])]
+    picked = random.sample(unused, min(n, len(unused)))
+    return [{"word": w["word"], "tatoeba": sources.tatoeba_with_word(w["forms"], n=3)} for w in picked]

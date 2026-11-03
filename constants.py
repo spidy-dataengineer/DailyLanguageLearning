@@ -2,8 +2,8 @@
 import datetime as dt
 
 STYLES = ["everyday", "business", "ielts", "academic", "travel", "slang", "idiom"]
-EN_SOURCES = ["BBC", "Luke's", "Claude", "Merriam-Webster", "Tatoeba", "Instagram", "YouTube"]
-ZH_SOURCES = ["HSK", "Tatoeba", "Instagram", "YouTube"]
+EN_SOURCES = ["BBC", "Luke's", "Claude", "Merriam-Webster", "Tatoeba", "TSL", "NAWL", "Instagram", "YouTube"]
+ZH_SOURCES = ["HSK", "CC-CEDICT", "Tatoeba", "Instagram", "YouTube"]
 TARGETS = {"en": 30, "zh": 10}
 SIM_THRESHOLD = 0.85
 MAX_HSK_LEVEL = 6

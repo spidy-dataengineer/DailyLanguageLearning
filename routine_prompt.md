@@ -60,14 +60,22 @@ exactly that name.
      `candidates.youtube` (latest uploads from everyday-English channels — the `title`/`description`
      usually name the target phrase; mine those), plus one of `candidates.bbc` / `lukes` (pick a
      *different* primary source than recent days, for variety). Use `candidates.tatoeba` for
-     authentic example sentences. Candidates are seeds — prefer real, common usage over source rarity.
-   - The `business` and `ielts` slots usually have **no seed** in `candidates`. Draw those from your
-     own knowledge of current workplace usage and IELTS band-7+ vocabulary, set `source` to `Claude`,
-     and leave `source_url` null. Only claim a real source when you actually used its material.
+     authentic example sentences (`text`, `url`). Candidates are seeds — prefer real, common usage over source rarity.
+   - **Word lists for the `business` and `ielts` slots:** `candidates.tsl` (TOEIC words) seeds `business`,
+     `candidates.nawl` (academic words) seeds `ielts`. Take **at least half** of each slot from its list,
+     skipping any word the frequency test or exam-use rule above rejects. Teach the word in its usual
+     collocation when it has one. Set `source` to `TSL` / `NAWL`. Each word carries real sentences in
+     `tatoeba`: when one is natural and clear, use it as `example` word for word and set `source_url` to its
+     `url` (that credits its author); otherwise write your own example and leave `source_url` null.
+     Tatoeba is written by volunteers: never use a sentence that is sexual, violent, hateful or awkward.
+   - The rest of those slots may come from your own knowledge of current workplace usage and IELTS
+     band-7+ vocabulary: set `source` to `Claude` and leave `source_url` null. Only claim a real source
+     when you actually used its material.
 
    **Chinese (10 items, beginner — 기초부터):**
    - Use `candidates.hsk` words (already filtered to unused, frequency order) as the backbone;
-     use `candidates.tatoeba` for real example sentences; use `candidates.inbox` first if present.
+     use `candidates.inbox` first if present. Each word carries real sentences in `tatoeba`: when one is
+     simple enough for the level, use it as `example` word for word and set `source_url` to its `url`.
    - Each `candidates.hsk` word lists its `readings` — one `{pinyin, meanings}` per pronunciation,
      with dictionary noise (surnames, `variant of` / `see` cross-references, archaic senses) already
      dropped. **When a word has 2+ readings, make ONE card that teaches every reading a learner at
@@ -116,6 +124,10 @@ exactly that name.
      (take off / taking off / took off, pull your weight / pull one's weight) or a near-synonym /
      reworded version of one in `related`; keep it if it only shares an ordinary word.
    - `clear` — nothing close is saved. Keep.
+
+   For `zh`, `check` also prints `dictionary`: the CC-CEDICT readings of each pick (`bei3 jing1` = běi jīng;
+   5 = neutral tone). **Write `pronunciation` to agree with it.** Empty means a phrase the dictionary lacks.
+   When you pick a word from the dictionary rather than HSK, set `source` to `CC-CEDICT`.
 
    Replace what you dropped with new picks and run `check` again on just the replacements, until
    you have the target count (or the frequency rule above says to write fewer).

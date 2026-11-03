@@ -132,7 +132,7 @@ def sns_unused(notion: Client, used_urls: set) -> list:
 # --- fetch mode --------------------------------------------------------------
 
 def fetch(lang: str) -> None:
-    from content.dedup import hsk_candidates  # local to avoid touching dedup at module load
+    from content.dedup import hsk_candidates, wordlist_candidates  # local to avoid touching dedup at module load
     notion = _client()
     today = kst_today().isoformat()
     if lang == "en":
@@ -147,19 +147,21 @@ def fetch(lang: str) -> None:
                 "youtube": sources.youtube_channels(),
                 "lukes": sources.lukes_english(),
                 "tatoeba": sources.tatoeba_samples("eng", n=12),
+                "tsl": wordlist_candidates(rows, "TSL"),
+                "nawl": wordlist_candidates(rows, "NAWL"),
                 "inbox": inbox_unprocessed(notion, "English"),
             },
         }
     elif lang == "zh":
         rows = existing_rows(notion, os.environ["NOTION_DB_ID_ZH"])
         level, hsk = hsk_candidates(rows, n=TARGETS["zh"] * 2)
+        hsk = [{**w, "tatoeba": sources.tatoeba_samples("cmn", contains=[w["simplified"]], n=3)} for w in hsk]
         out = {
             "language": "zh", "today": today, "target_count": TARGETS["zh"],
             "current_hsk_level": level, "styles": STYLES,
             "saved_count": len({r["expression"] for r in rows if r["expression"]}),
             "candidates": {
                 "hsk": hsk,
-                "tatoeba": sources.tatoeba_samples("cmn", contains=[w["simplified"] for w in hsk], n=12),
                 "inbox": inbox_unprocessed(notion, "Chinese"),
                 "sns": sns_unused(notion, {r["source_url"] for r in rows if r["source_url"]}),
             },
@@ -182,7 +184,10 @@ def check(lang: str, path: str) -> None:
     cands = [c for c in cands if c]
     db_env = "NOTION_DB_ID_EN" if lang == "en" else "NOTION_DB_ID_ZH"
     saved = sorted({r["expression"] for r in existing_rows(_client(), os.environ[db_env]) if r["expression"]})
-    print(json.dumps(check_candidates(cands, saved), ensure_ascii=False, indent=2))
+    result = check_candidates(cands, saved)
+    if lang == "zh":
+        result["dictionary"] = {c: sources.cedict_readings(c) for c in cands}
+    print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 # --- audio URLs (pronunciation) ----------------------------------------------

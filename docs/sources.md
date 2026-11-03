@@ -10,13 +10,17 @@ source never breaks the run.
 | BBC The English We Speak | `podcasts.files.bbci.co.uk/p02pc9zn.rss` (+ transcript page) | none | high | ✅ episode title = target phrase |
 | YouTube channels | `youtube.com/feeds/videos.xml?channel_id=…` per channel (`sources.YT_CHANNELS`) | none | high | ✅ latest uploads' title + description; allowlist `youtube.com` |
 | Luke's English Podcast | `teacherluke.co.uk/feed/` | none | high | ✅ |
-| Tatoeba | `data/tatoeba_eng.tsv` subset | none | high (local file) | optional (no file) |
+| Tatoeba | `content/data/tatoeba_eng.tsv` subset, `{text, url}` | none | high (local file) | ✅ since 2026-11 (the file was missing before, so this was always empty) |
+| TSL (TOEIC) · NAWL (academic) word lists | `content/data/wordlist_en.tsv` → `candidates.tsl` / `nawl`: 20 random words without a card, 3 Tatoeba sentences each | none | high (local file) | ✅ seeds `business` / `ielts` |
 
 ## Chinese
 | Source | Where | Auth | Status |
 |---|---|---|---|
 | HSK list | `drkameleon/complete-hsk-vocabulary` raw JSON, per level | none | ✅ progression backbone; each word → `readings` (see below) |
-| Tatoeba | `data/tatoeba_cmn.tsv` subset | none | optional |
+| Tatoeba | `content/data/tatoeba_cmn.tsv`, up to 30 characters; 3 sentences on each `candidates.hsk` word | none | ✅ |
+| CC-CEDICT | `content/data/cedict.txt.gz`; `check zh` prints each pick's readings as `dictionary` | none | ✅ pinyin check, extra words |
+
+Refreshing the files: `python content/prepare_sources.py <download_dir>`; licences in `content/data/README.md`.
 
 ## Dropped
 - **Merriam-Webster Word-of-the-Day** (removed 2026-09) — the RSS feed worked fine, but its word is
