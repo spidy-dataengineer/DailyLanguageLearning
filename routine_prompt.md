@@ -140,8 +140,9 @@ exactly that name.
    It creates the rows, marks processed inbox items, and posts the Discord summary. Report its output.
 
 6. **Wrong options for the Language Quiz app.** The app's repository `Language-Study-In-Between-Tasks` is
-   cloned next to this one. Its daily sync copied earlier days' cards into `data/cards.*.json`, so this step
-   covers the cards from before today; today's cards get theirs tomorrow. Work in that repository:
+   cloned next to this one. If it is not there, say so in your summary and stop; do not clone it yourself.
+   Its daily sync copied earlier days' cards into `data/cards.*.json`, so this step covers the cards from
+   before today; today's cards get theirs tomorrow. Work in that repository:
    - `git pull --rebase origin main`, then read `scripts/distractors/rules.md` and follow its rules.
    - For `en`, then `zh`: `node scripts/distractors/next.ts <lang> 200` prints the cards with no options.
      If it says `남은 카드 0`, go to the next language. Otherwise write
