@@ -139,6 +139,22 @@ exactly that name.
 5. Run: `python daily_notion.py write en_items.json zh_items.json`
    It creates the rows, marks processed inbox items, and posts the Discord summary. Report its output.
 
+6. **Wrong options for the Language Quiz app.** The app's repository `Language-Study-In-Between-Tasks` is
+   cloned next to this one. Its daily sync copied earlier days' cards into `data/cards.*.json`, so this step
+   covers the cards from before today; today's cards get theirs tomorrow. Work in that repository:
+   - `git pull --rebase origin main`, then read `scripts/distractors/rules.md` and follow its rules.
+   - For `en`, then `zh`: `node scripts/distractors/next.ts <lang> 200` prints the cards with no options.
+     If it says `남은 카드 0`, go to the next language. Otherwise write
+     `migration/distractors/batch.txt` and run `node scripts/distractors/add.ts`. Rewrite the lines it prints
+     under `거부` and the ones it warns about, and run `next.ts` and `add.ts` again until no card is left.
+     If `node` refuses a `.ts` file, use `npx -y tsx` in its place.
+   - Do not write `!` lines. Name any card that looks wrong in your final summary instead.
+   - `git add data/distractors.en.json data/distractors.zh.json` (only these), commit as
+     `options: <today>`, `git pull --rebase origin main`, `git push origin main`.
+
+   The cards from step 5 are already saved. If this step fails, say so in your summary and stop; the next
+   run picks up every card still without options.
+
 ## Item schema (each object in the arrays)
 
 ```json

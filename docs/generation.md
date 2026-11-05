@@ -3,6 +3,11 @@
 The scheduled routine's Claude produces the daily items from `fetch` output, following
 `routine_prompt.md`. This doc is the **policy/rationale**; edit both together when changing rules.
 
+The same run also writes wrong answer options for the Language Quiz app (step 6 of the prompt), in that
+app's repository. The rules live there, in `scripts/distractors/rules.md`. It covers cards from earlier days:
+today's cards reach that repository only at its 09:00 KST sync, after this run. A failure there leaves the
+Notion cards as they are, and the next run picks up what is left.
+
 ## Volume
 `TARGETS = {"en": 30, "zh": 10}` in `constants.py` → 40/day total. Ambitious — pair with review;
 lower anytime. `fetch` over-provides candidates (e.g. ~20 HSK words) so dedup still leaves enough.
