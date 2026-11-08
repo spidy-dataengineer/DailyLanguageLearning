@@ -19,8 +19,8 @@ wording; the run reports the per-slot count.
 ## Level
 - **English**: a **fixed split by purpose** — 10 everyday · 10 business · 10 IELTS (see Style below).
   The 20 everyday+business items must pass a frequency test; the 10 IELTS items are the only slots where
-  formal, lower-frequency wording is allowed. (The `Level` select stays the fixed label `EN-advanced` —
-  it isn't aggregated in stats for EN, so re-labelling only churns Notion options.)
+  formal, lower-frequency wording is allowed. Each card's `Level` is `EN1`–`EN7` by how hard its meaning is
+  (table in `routine_prompt.md`; all saved cards re-rated 2026-11-08, rules in the app repo's `docs/levels.md`).
 - **Chinese**: from **HSK1, in order** (progression tracked via the DB). Beginner-appropriate, short.
 
 ## Style (genre)

@@ -52,6 +52,16 @@ exactly that name.
      literary, or archaic vocabulary, and no dictionary-headword curiosities.** The `ielts` slots are
      the only place formal, lower-frequency wording belongs — and even there it must be exam-useful,
      not obscure.
+   - **`level` = how hard the meaning is for a Korean learner, `EN1`–`EN7`** (CEFR-based; the app's
+     level test and difficulty filter read it). Judge each card on its own; the slot does not set it.
+     - `EN1` A1–A2: basic words, greetings, short daily phrases — "How are you?", "I'm hungry"
+     - `EN2` early B1: very common phrasal verbs and short replies — "pick up", "my bad", "fair enough"
+     - `EN3` late B1: common outside textbooks, basic work words — "call it a day", "follow up"
+     - `EN4` early B2: general work/news words, common idioms — "circle back", "cut corners", "consequently"
+     - `EN5` late B2: less common idioms, formal words, widespread slang — "a can of worms", "albeit"
+     - `EN6` C1: advanced words, subtle meanings, rarer idioms — "pedantic", "toe the line"
+     - `EN7` C2: rare literary or technical words — "palimpsest", "recondite"
+     Most `everyday`/`business` cards land in `EN1`–`EN4`, most `ielts` cards in `EN4`–`EN6`.
    - **The frequency test beats the count.** If you cannot find 10 genuinely common, not-yet-saved
      items for a slot, write fewer for that slot rather than filling it with rare wording, and say
      how many you wrote per slot in your final summary.
@@ -168,7 +178,7 @@ exactly that name.
   "example2_ko": "그녀는 프로젝트 중간에 합류했지만 곧바로 적응해 며칠 만에 따라잡았다.",
   "pronunciation": "/hɪt ðə ɡraʊnd ˈrʌnɪŋ/",
   "style": "idiom",
-  "level": "EN-advanced",
+  "level": "EN4",
   "usage_note": "새 일·역할을 빠르게 잘 시작한다는 뜻. 'start strong'보다 관용적.",
   "source": "BBC",
   "source_url": "https://www.bbc.co.uk/learningenglish",

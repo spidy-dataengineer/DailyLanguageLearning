@@ -139,7 +139,7 @@ def fetch(lang: str) -> None:
         rows = existing_rows(notion, os.environ["NOTION_DB_ID_EN"])
         out = {
             "language": "en", "today": today, "target_count": TARGETS["en"],
-            "level": "EN-advanced", "styles": STYLES,
+            "styles": STYLES,
             "saved_count": len({r["expression"] for r in rows if r["expression"]}),
             "candidates": {
                 "bbc": sources.bbc_six_minute(),
@@ -290,7 +290,7 @@ def _properties(item: dict, lang: str) -> dict:
         props[name] = {"select": {"name": val}}
     if item.get("style") in STYLES:
         props["Style"] = {"select": {"name": item["style"]}}
-    level = item.get("level") or ("EN-advanced" if lang == "en" else "")
+    level = item.get("level")
     if level:
         props["Level"] = {"select": {"name": level}}
     if item.get("source"):

@@ -14,7 +14,7 @@ Created by `python daily_notion.py init <en_page_id> <zh_page_id> [inbox_page_id
 
 ## Expression schema (EN & ZH share structure)
 `Expression`(title) · `Meaning (KO)` · `Example` · `Example (KO)` · `Example 2` · `Example 2 (KO)` · `Pronunciation` ·
-`Style`(select) · `Level`(select: `EN-advanced` / `HSK1`–`HSK6`) · `Usage note` ·
+`Style`(select) · `Level`(select: `EN1`–`EN7` / `HSK1`–`HSK6`) · `Usage note` ·
 `Source`(select) · `Source URL`(url) · `Date` · `Audio`(url — ZH: native recording (audio-cmn mp3 → Wikimedia Commons ogg), else a YouGlish link; EN empty for now) ·
 `Box`(number) · `Next review`(date) · `Recall`(select: Got it/Forgot — the only field you mark) · `Last reviewed`(date) → SRS, see [review](review.md) ·
 `Year` · `Month` · `Week` (select — e.g. `2026` / `2026 04월` / `2026 04월 2주`): calendar buckets for grouping a view by 연도/월/주. Filled at write from `Date` (EN & ZH bucket identically); `migrate` backfills existing rows. Week starts Sunday; the week containing the 1st is week 1. See `constants.period_labels`.
