@@ -4,14 +4,18 @@ import datetime as dt
 STYLES = ["everyday", "business", "ielts", "academic", "travel", "slang", "idiom"]
 EN_SOURCES = ["BBC", "Luke's", "Claude", "Merriam-Webster", "Tatoeba", "TSL", "NAWL", "Instagram", "YouTube"]
 ZH_SOURCES = ["HSK", "CC-CEDICT", "Tatoeba", "Instagram", "YouTube"]
-TARGETS = {"en": 30, "zh": 10}
+TARGETS = {"en": 30, "zh": 30}
 SIM_THRESHOLD = 0.85
 MAX_HSK_LEVEL = 6
 INTERVALS = {1: 1, 2: 3, 3: 7, 4: 16, 5: 35}
 # Exact names of the environment variables the routine needs (values are never printed; see check-env).
 REQUIRED_ENV = ["NOTION_TOKEN", "NOTION_DB_ID_EN", "NOTION_DB_ID_ZH", "NOTION_DB_ID_INBOX", "DISCORD_WEBHOOK_URL"]
-# sns-classifier's "중국어 저장게시물" DB: its new posts become extra Chinese cards on top of TARGETS["zh"].
+# sns-classifier's "중국어 저장게시물" / "영어 저장게시물" DBs: their new posts become extra cards on top of TARGETS.
 SNS_ZH_DB_ID = "3325aa0acd6948e5b238ce0e83201ec8"
+SNS_EN_DB_ID = "9e5d11a21cb94d838bf71c297ee2ffc0"
+# The quiz app's Supabase project: the cards' source since 2026-11-10 (Notion keeps a backup that follows it).
+# Not secret: the app ships the same address. The key travels separately, see db/cards_db.py.
+SUPABASE_URL = "https://qvdtpzbzatiiaoywuybs.supabase.co"
 SNS_DAYS = 7  # posts saved this many days back are offered until a card cites them
 SNS_TEXT_MAX = 3000  # chars of OCR text + transcript per post
 REVIEW_CAP = 25  # unmarked cards reviewed per language per day; the rest stay due, longest-waiting first

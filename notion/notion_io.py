@@ -14,15 +14,19 @@ import sys
 import unicodedata
 from urllib.parse import quote
 
+import httpx
 import requests
 from dotenv import load_dotenv
 from notion_client import Client
+from notion_client.errors import NotionClientErrorBase
 from notion_client.helpers import collect_paginated_api
 
 from content import sources
-from constants import (EN_SOURCES, MAX_HSK_LEVEL, SNS_DAYS, SNS_TEXT_MAX, SNS_ZH_DB_ID, STYLES, TARGETS,
-                       ZH_SOURCES, kst_today, period_labels)
+from constants import (EN_SOURCES, MAX_HSK_LEVEL, SNS_DAYS, SNS_EN_DB_ID, SNS_TEXT_MAX, SNS_ZH_DB_ID, STYLES,
+                       TARGETS, ZH_SOURCES, kst_today, period_labels)
 from content.dedup import similar_to_any
+from content.options_check import check_options
+from db import cards_db
 from notify.notify import notify_write
 
 load_dotenv()
@@ -75,14 +79,6 @@ def _due_date(prop):
     return d.get("start") if d else None
 
 
-def existing_rows(notion: Client, db_id: str):
-    ds = data_source_id(notion, db_id)
-    rows = collect_paginated_api(notion.data_sources.query, data_source_id=ds)
-    return [{"expression": _plain(r.get("properties", {}).get("Expression")),
-             "level": _select_name(r.get("properties", {}).get("Level")),
-             "source_url": (r.get("properties", {}).get("Source URL") or {}).get("url")} for r in rows]
-
-
 def inbox_unprocessed(notion: Client, language: str):
     ds = data_source_id(notion, os.environ["NOTION_DB_ID_INBOX"])
     flt = {"and": [
@@ -102,12 +98,12 @@ def inbox_unprocessed(notion: Client, language: str):
     return out
 
 
-def sns_unused(notion: Client, used_urls: set) -> list:
-    """Chinese-study posts the sns-classifier saved in the last SNS_DAYS days that no card cites yet.
+def sns_unused(notion: Client, db_id: str, used_urls: set) -> list:
+    """Posts the sns-classifier saved in that language's DB in the last SNS_DAYS days that no card cites yet.
 
     A card made from a post keeps the post's link in `Source URL`, so a used post drops out on its own.
     """
-    ds = data_source_id(notion, SNS_ZH_DB_ID)
+    ds = data_source_id(notion, db_id)
     since = (kst_today() - dt.timedelta(days=SNS_DAYS)).isoformat()
     flt = {"timestamp": "created_time", "created_time": {"on_or_after": since}}
     out = []
@@ -136,7 +132,7 @@ def fetch(lang: str) -> None:
     notion = _client()
     today = kst_today().isoformat()
     if lang == "en":
-        rows = existing_rows(notion, os.environ["NOTION_DB_ID_EN"])
+        rows = cards_db.saved_rows("en")
         out = {
             "language": "en", "today": today, "target_count": TARGETS["en"],
             "styles": STYLES,
@@ -150,10 +146,11 @@ def fetch(lang: str) -> None:
                 "tsl": wordlist_candidates(rows, "TSL"),
                 "nawl": wordlist_candidates(rows, "NAWL"),
                 "inbox": inbox_unprocessed(notion, "English"),
+                "sns": sns_unused(notion, SNS_EN_DB_ID, {r["source_url"] for r in rows if r["source_url"]}),
             },
         }
     elif lang == "zh":
-        rows = existing_rows(notion, os.environ["NOTION_DB_ID_ZH"])
+        rows = cards_db.saved_rows("zh")
         level, hsk = hsk_candidates(rows, n=TARGETS["zh"] * 2)
         hsk = [{**w, "tatoeba": sources.tatoeba_samples("cmn", contains=[w["simplified"]], n=3)} for w in hsk]
         out = {
@@ -163,7 +160,7 @@ def fetch(lang: str) -> None:
             "candidates": {
                 "hsk": hsk,
                 "inbox": inbox_unprocessed(notion, "Chinese"),
-                "sns": sns_unused(notion, {r["source_url"] for r in rows if r["source_url"]}),
+                "sns": sns_unused(notion, SNS_ZH_DB_ID, {r["source_url"] for r in rows if r["source_url"]}),
             },
         }
     else:
@@ -182,8 +179,7 @@ def check(lang: str, path: str) -> None:
         raw = json.load(f)
     cands = [((c.get("expression") if isinstance(c, dict) else c) or "").strip() for c in raw]
     cands = [c for c in cands if c]
-    db_env = "NOTION_DB_ID_EN" if lang == "en" else "NOTION_DB_ID_ZH"
-    saved = sorted({r["expression"] for r in existing_rows(_client(), os.environ[db_env]) if r["expression"]})
+    saved = sorted({r["expression"] for r in cards_db.saved_rows(lang) if r["expression"]})
     result = check_candidates(cands, saved)
     if lang == "zh":
         result["dictionary"] = {c: sources.cedict_readings(c) for c in cands}
@@ -413,18 +409,23 @@ def _write_practice(notion: Client, ds: str, sentences: list) -> None:
 # --- write mode --------------------------------------------------------------
 
 def write(en_file, zh_file) -> None:
+    """Each card goes to the database first (its source), then to a Notion backup page linked in card_backups.
+
+    A card the database refused is left out entirely and reported. A backup page that failed is only reported:
+    the app repo's daily job makes it from the database.
+    """
     notion = _client()
+    today = kst_today()
     written = {"en": [], "zh": []}
-    skipped = []
+    skipped, db_failed, backup_pending, options_refused, options_warnings = [], [], [], [], []
     processed_inbox = []
     for lang, path, db_env in [("en", en_file, "NOTION_DB_ID_EN"), ("zh", zh_file, "NOTION_DB_ID_ZH")]:
         if not path or not os.path.exists(path):
             continue
         with open(path, encoding="utf-8") as f:
             items = json.load(f)
-        db_id = os.environ[db_env]
-        ds = data_source_id(notion, db_id)
-        seen = [r["expression"] for r in existing_rows(notion, db_id) if r["expression"]]
+        ds = data_source_id(notion, os.environ[db_env])
+        seen = [r["expression"] for r in cards_db.saved_rows(lang) if r["expression"]]
         for item in items:
             if item.get("type") == "practice":
                 _write_practice(notion, ds, item.get("sentences") or [])
@@ -435,21 +436,71 @@ def write(en_file, zh_file) -> None:
             if similar_to_any(expr, seen):
                 skipped.append(f"{lang}: {expr}")
                 continue
-            notion.pages.create(parent={"type": "data_source_id", "data_source_id": ds},
-                                properties=_properties(item, lang),
-                                icon=_icon(lang),
-                                children=_page_body(item, lang))
+            options = item.get("options")
+            if options is not None:
+                problem, warnings = check_options({**item, "expression": expr}, options)
+                options_warnings += warnings
+                if problem:
+                    options_refused.append(problem)
+                    options = None
+            audio = (native_audio_url(expr, item.get("pronunciation")) or youglish_url(expr, lang)) if lang == "zh" else None
+            try:
+                card_id = cards_db.insert_card(cards_db.card_row(item, lang, options, audio, today))
+            except requests.RequestException as e:
+                db_failed.append(f"{lang}: {expr} ({e})")
+                continue
             seen.append(expr)
             written[lang].append(item)
             if item.get("inbox_page_id"):
                 processed_inbox.append(item["inbox_page_id"])
+            try:
+                page = notion.pages.create(parent={"type": "data_source_id", "data_source_id": ds},
+                                           properties=_properties(item, lang),
+                                           icon=_icon(lang),
+                                           children=_page_body(item, lang))
+                cards_db.record_backup(card_id, page["id"])
+            except (NotionClientErrorBase, httpx.HTTPError, requests.RequestException) as e:
+                backup_pending.append(f"{lang}: {expr} ({e})")
     for pid in set(processed_inbox):
         notion.pages.update(page_id=pid, properties={"Processed": {"checkbox": True}})
     notify_write(written)
     if skipped:
         _log(f"skipped {len(skipped)} similar/duplicate: {skipped}")
-    print(json.dumps({"written_en": len(written["en"]), "written_zh": len(written["zh"]),
-                      "skipped": skipped}, ensure_ascii=False, indent=2))
+    print(json.dumps({"written_en": len(written["en"]), "written_zh": len(written["zh"]), "skipped": skipped,
+                      "db_failed": db_failed, "backup_pending": backup_pending,
+                      "options_refused": options_refused, "options_warnings": options_warnings},
+                     ensure_ascii=False, indent=2))
+
+
+# --- wrong options for cards that have none (docs/options.md) ----------------
+
+def missing_options(lang: str, n: int) -> None:
+    if lang not in ("en", "zh"):
+        raise SystemExit("missing-options arg must be 'en' or 'zh'")
+    cards = cards_db.missing_options(lang, n)
+    print(json.dumps({"left_shown": len(cards), "cards": cards}, ensure_ascii=False, indent=2))
+
+
+def add_options(path: str) -> None:
+    """Checks [{"id", "expression", "options"}] against the cards in the database and writes the ones that pass."""
+    with open(path, encoding="utf-8") as f:
+        entries = json.load(f)
+    cards = cards_db.cards_by_id([e["id"] for e in entries if e.get("id")])
+    added, refused, warnings = 0, [], []
+    for e in entries:
+        card = cards.get(e.get("id"))
+        if not card or card["expression"] != e.get("expression"):
+            refused.append(f"{e.get('expression')}: 카드가 없거나 표현이 바뀜")
+            continue
+        problem, warns = check_options(card, e.get("options"))
+        warnings += warns
+        if problem:
+            refused.append(problem)
+        elif cards_db.set_options(card["id"], card["expression"], e["options"]):
+            added += 1
+        else:
+            refused.append(f"{card['expression']}: 쓰는 사이 표현이 바뀜")
+    print(json.dumps({"added": added, "refused": refused, "warnings": warnings}, ensure_ascii=False, indent=2))
 
 
 # --- init / migrate ----------------------------------------------------------

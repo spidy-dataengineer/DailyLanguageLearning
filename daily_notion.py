@@ -4,15 +4,20 @@ Modes:
   python daily_notion.py init <en_page_id> <zh_page_id> [inbox_page_id]   # create the 3 databases
   python daily_notion.py fetch <en|zh>                                    # gather raw material -> JSON on stdout
   python daily_notion.py check <en|zh> <candidates.json>                  # which candidates are already saved
-  python daily_notion.py write <en_items.json> <zh_items.json>            # create rows + notify
+  python daily_notion.py write <en_items.json> <zh_items.json>            # cards to the database, Notion backup + notify
+  python daily_notion.py missing-options <en|zh> <n>                      # cards with no written wrong options yet
+  python daily_notion.py add-options <options.json>                       # check + write wrong options to the database
   python daily_notion.py review                                           # SRS: surface due cards, reschedule
   python daily_notion.py stats                                            # read-only aggregates -> JSON + Discord
   python daily_notion.py migrate                                          # ensure SRS properties on existing DBs
   python daily_notion.py check-env                                        # which required env vars are set (names + lengths only)
+  python daily_notion.py check-db                                         # the card database answers and takes the key
 
 Python only does I/O (gather + write). The /schedule routine's own Claude reasoning turns the
 fetched raw material into the day's items (see routine_prompt.md). Code is split by concern:
   notion/notion_io.py — Notion API + schema/init + page layout + audio + fetch + write
+  db/cards_db.py      — the quiz app's card database (Supabase), the cards' source; Notion is its backup
+  content/options_check.py — checks written wrong options (docs/options.md)
   content/sources.py  — external source fetchers (MW, BBC, Luke's, HSK, Tatoeba)
   content/dedup.py    — similarity-based duplicate detection + HSK progression
   srs/review.py       — SRS (spaced repetition) review logic
@@ -27,7 +32,8 @@ import os
 import sys
 
 from constants import REQUIRED_ENV
-from notion.notion_io import check, fetch, init, migrate, write
+from db import cards_db
+from notion.notion_io import add_options, check, fetch, init, migrate, missing_options, write
 from srs.review import review
 from srs.stats import stats
 
@@ -68,6 +74,19 @@ def main(argv) -> None:
         check(argv[2], argv[3])
     elif cmd == "check-env":
         check_env()
+    elif cmd == "check-db":
+        result = cards_db.reachable()
+        print(json.dumps(result))
+        if not result["ok"]:
+            raise SystemExit(1)
+    elif cmd == "missing-options":
+        if len(argv) < 4:
+            raise SystemExit("usage: daily_notion.py missing-options <en|zh> <n>")
+        missing_options(argv[2], int(argv[3]))
+    elif cmd == "add-options":
+        if len(argv) < 3:
+            raise SystemExit("usage: daily_notion.py add-options <options.json>")
+        add_options(argv[2])
     elif cmd == "migrate":
         migrate()
     elif cmd == "review":

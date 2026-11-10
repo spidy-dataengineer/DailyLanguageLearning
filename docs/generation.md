@@ -3,14 +3,15 @@
 The scheduled routine's Claude produces the daily items from `fetch` output, following
 `routine_prompt.md`. This doc is the **policy/rationale**; edit both together when changing rules.
 
-The same run also writes wrong answer options for the Language Quiz app (step 6 of the prompt), in that
-app's repository. The rules live there, in `scripts/distractors/rules.md`. It covers cards from earlier days:
-today's cards reach that repository only at its 09:00 KST sync, after this run. A failure there leaves the
-Notion cards as they are, and the next run picks up what is left.
+Since 2026-11-10 the cards' source is the quiz app's database (Supabase): `write` adds each card there first,
+then a Notion backup page (`db/cards_db.py`). Each new card carries its three wrong options for the app
+(step 4 of the prompt), and step 6 fills the cards that still have none; the rules are in `docs/options.md`.
+A refused option leaves the card saved without it, and the next run offers it again.
 
 ## Volume
-`TARGETS = {"en": 30, "zh": 10}` in `constants.py` → 40/day total. Ambitious — pair with review;
-lower anytime. `fetch` over-provides candidates (e.g. ~20 HSK words) so dedup still leaves enough.
+`TARGETS = {"en": 30, "zh": 30}` in `constants.py` → 60/day total (Chinese raised from 10 on 2026-11-10,
+user's request). Ambitious — pair with review; lower anytime. `fetch` over-provides candidates
+(e.g. ~60 HSK words) so dedup still leaves enough. Chinese moves through the HSK list three times faster.
 New cards enter the SRS review loop at box 1 — see [review](review.md).
 **The frequency test beats the count**: at 10 per slot per day the pool of genuinely common
 expressions thins out over months, so a slot may come in under 10 rather than be padded with rare

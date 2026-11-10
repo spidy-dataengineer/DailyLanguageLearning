@@ -1,9 +1,13 @@
 # Daily Language-Learning Routine — Prompt
 
 You are running as a scheduled daily routine inside this repository. Your job: add
-**30 English** (10 everyday · 10 business · 10 IELTS) and **10 beginner Chinese** expressions to two Notion databases,
+**30 English** (10 everyday · 10 business · 10 IELTS) and **30 beginner Chinese** expressions as cards,
 sourced from real content, with **no repeats or near-duplicates**. The Python script
 does all I/O; **you** do the language selection + expansion. Work in the repo directory.
+
+The cards' source is the quiz app's database (Supabase). Each card is written there first, then to the
+English / Chinese Notion database as a backup page. This environment adds the database key to those requests
+on its own; you never see or need it, so do not look for it.
 
 ## Required environment variables (exact names)
 
@@ -13,6 +17,9 @@ Check them **only** with `python daily_notion.py check-env` (prints names + leng
 Do not look for any other variable name and do not guess names such as `NOTION_EN_DB_ID` — they do not
 exist. Continue when it prints `"ok": true`; if it lists a name under `missing`, stop and report
 exactly that name.
+
+Then run `python daily_notion.py check-db`. It reads one card id from the database. Continue when it prints
+`"ok": true`; otherwise stop and report the `status` it printed (401 means the database key isn't reaching it).
 
 ## Steps
 
@@ -24,9 +31,10 @@ exactly that name.
    - `python daily_notion.py fetch en`
    - `python daily_notion.py fetch zh`
 
-   Each prints: `today`, `target_count` (en 30, zh 10), `saved_count` (how many expressions are
+   Each prints: `today`, `target_count` (en 30, zh 30), `saved_count` (how many expressions are
    already saved — the list itself is not printed; step 3 checks your picks against it),
-   `candidates` (raw source material), and for zh `current_hsk_level` and `candidates.sns`.
+   `candidates` (raw source material, including `candidates.sns` saved posts for both languages), and for zh
+   `current_hsk_level`.
 
 2. Choose the day's expressions for English and Chinese from the candidates (rules below);
    steps 3–4 check them and expand each into a full learning card.
@@ -81,8 +89,19 @@ exactly that name.
    - The rest of those slots may come from your own knowledge of current workplace usage and IELTS
      band-7+ vocabulary: set `source` to `Claude` and leave `source_url` null. Only claim a real source
      when you actually used its material.
+   - **SNS posts — EXTRA cards, on top of the 30:** `candidates.sns` lists English posts the user saved on
+     Instagram/YouTube (`title`, `summary` = the user's Korean note, `tags`, and `text` = on-screen text +
+     video transcript; the transcript is machine-made, so trust on-screen text over it). A post may be an
+     English lesson or just a talk show, drama or vlog clip. Either way take what a learner can use: the
+     expressions it teaches, or the natural spoken phrases people in it actually say (reactions, phrasal
+     verbs, idioms, discourse markers) that pass the frequency test above — **up to 5 per post**, the most
+     useful first. Skip a post with no usable English (music only, a meme with no line) and name it in your
+     summary. Write your own `example` and `example2` rather than copying the post's sentence. Set `style`
+     and `level` by the card itself, `source` to `Instagram` or `YouTube` (from `link`) and `source_url` to
+     the post's `link` — that marks the post as used. Run them through step 3 like every pick; they do not
+     count toward the 30.
 
-   **Chinese (10 items, beginner — 기초부터):**
+   **Chinese (30 items, beginner — 기초부터):**
    - Use `candidates.hsk` words (already filtered to unused, frequency order) as the backbone;
      use `candidates.inbox` first if present. Each word carries real sentences in `tatoeba`: when one is
      simple enough for the level, use it as `example` word for word and set `source_url` to its `url`.
@@ -104,14 +123,15 @@ exactly that name.
      the day's Chinese words into 3–4 very simple sentences (beginner-level):
      `{"type": "practice", "sentences": [{"zh": "我爸爸的爱好是看书。", "pinyin": "wǒ bàba de àihào shì kàn shū", "ko": "우리 아빠의 취미는 독서야."}, ...]}`.
      Use as many of the day's words as fit naturally. (English array has no practice object.)
-   - **SNS posts — EXTRA cards, on top of the 10:** `candidates.sns` lists Chinese-study posts the
+   - **SNS posts — EXTRA cards, on top of the 30:** `candidates.sns` lists Chinese-study posts the
      user saved on Instagram/YouTube (`title`, `summary`, `tags`, and `text` = on-screen text + video
      transcript; the transcript is machine-made, so trust the Chinese characters in `summary`/`text`
      over garbled 한글 sound-spellings). From each post take the expressions it actually teaches —
      **up to 5 per post**, the most useful first; skip a post that names no expression. Any level
-     (not limited to `current_hsk_level`; set `level` to the closest `HSK1`–`HSK6`). Set `source` to
+     (not limited to `current_hsk_level`; set `level` to the closest `HSK1`–`HSK6`, or `HSK7-9` when the
+     expression's hardest word is from the 7–9 band). Set `source` to
      `Instagram` or `YouTube` (from `link`) and `source_url` to the post's `link` — that is what marks
-     the post as used. Run them through step 3 like every pick; they do not count toward the 10 and
+     the post as used. Run them through step 3 like every pick; they do not count toward the 30 and
      are not woven into the practice object.
 
    **Inbox items:** extract the single most useful expression from the link / `raw_text`; set
@@ -119,7 +139,7 @@ exactly that name.
    `inbox_page_id` to that row's `inbox_page_id` so the script marks it processed.
 
    **Pick before you write cards:** first choose the expressions only — about 1.5× the target
-   (≈45 English, ≈15 Chinese) — then run step 3, and only expand the survivors into full cards.
+   (≈45 English, ≈45 Chinese) — then run step 3, and only expand the survivors into full cards.
 
 3. **DEDUP (critical) — check your picks against everything already saved:**
    write the picked expressions as a JSON array of strings to `en_check.json` / `zh_check.json`, then run
@@ -144,24 +164,24 @@ exactly that name.
    Your picks must also not repeat each other — `check` flags repeats inside the list as `duplicates`.
 
 4. Expand the kept picks into the item objects and write the arrays to `en_items.json` and
-   `zh_items.json` in the repo (UTF-8).
+   `zh_items.json` in the repo (UTF-8). Each card also gets its three **wrong options** for the quiz app
+   (`options` in the schema below): read `docs/options.md` first and follow its rules.
 
 5. Run: `python daily_notion.py write en_items.json zh_items.json`
-   It creates the rows, marks processed inbox items, and posts the Discord summary. Report its output.
+   It adds each card to the database, makes its Notion backup page, marks processed inbox items, and posts
+   the Discord summary. Report its output, including these lists when they are not empty:
+   - `db_failed` — the database refused these cards, so they were not saved anywhere. Name them.
+   - `backup_pending` — saved, but the Notion page failed; the app's daily job makes it. Just report.
+   - `options_refused` — the card was saved without options; step 6 offers it again.
 
-6. **Wrong options for the Language Quiz app.** The app's repository `Language-Study-In-Between-Tasks` is
-   cloned next to this one. If it is not there, say so in your summary and stop; do not clone it yourself.
-   Its daily sync copied earlier days' cards into `data/cards.*.json`, so this step covers the cards from
-   before today; today's cards get theirs tomorrow. Work in that repository:
-   - `git pull --rebase origin main`, then read `scripts/distractors/rules.md` and follow its rules.
-   - For `en`, then `zh`: `node scripts/distractors/next.ts <lang> 200` prints the cards with no options.
-     If it says `남은 카드 0`, go to the next language. Otherwise write
-     `migration/distractors/batch.txt` and run `node scripts/distractors/add.ts`. Rewrite the lines it prints
-     under `거부` and the ones it warns about, and run `next.ts` and `add.ts` again until no card is left.
-     If `node` refuses a `.ts` file, use `npx -y tsx` in its place.
-   - Do not write `!` lines. Name any card that looks wrong in your final summary instead.
-   - `git add data/distractors.en.json data/distractors.zh.json` (only these), commit as
-     `options: <today>`, `git pull --rebase origin main`, `git push origin main`.
+6. **Wrong options for cards that still have none** (earlier cards, and any refused in step 5). For `en`,
+   then `zh`:
+   - `python daily_notion.py missing-options <lang> 100` lists up to 100 cards with no options.
+     If `cards` is empty, go to the next language.
+   - Write `<lang>_options.json`: `[{"id": ..., "expression": ..., "options": [[expression, meaning] x3]}]`
+     following `docs/options.md`, then run `python daily_notion.py add-options <lang>_options.json`.
+     Rewrite the ones under `refused` and run `add-options` again on just those. Fix what `warnings` names
+     when it is easy. A card that looks wrong in itself: leave it out and name it in your summary.
 
    The cards from step 5 are already saved. If this step fails, say so in your summary and stop; the next
    run picks up every card still without options.
@@ -182,7 +202,12 @@ exactly that name.
   "usage_note": "새 일·역할을 빠르게 잘 시작한다는 뜻. 'start strong'보다 관용적.",
   "source": "BBC",
   "source_url": "https://www.bbc.co.uk/learningenglish",
-  "inbox_page_id": null
+  "inbox_page_id": null,
+  "options": [
+    ["to get off on the wrong foot", "처음부터 일이 꼬이다"],
+    ["to drag one's feet", "일부러 꾸물거리며 미루다"],
+    ["to jump the gun", "때가 되기 전에 성급하게 나서다"]
+  ]
 }
 ```
 
