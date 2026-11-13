@@ -129,7 +129,8 @@ Then run `python daily_notion.py check-db`. It reads one card id from the databa
      over garbled 한글 sound-spellings). From each post take the expressions it actually teaches —
      **up to 5 per post**, the most useful first; skip a post that names no expression. Any level
      (not limited to `current_hsk_level`; set `level` to the closest `HSK1`–`HSK6`, or `HSK7-9` when the
-     expression's hardest word is from the 7–9 band). Set `source` to
+     expression's hardest word is from the 7–9 band). HSK here is the November 2025 syllabus — the list
+     `candidates.hsk` comes from (level 1 is only 300 words) — not the 2021 or older lists. Set `source` to
      `Instagram` or `YouTube` (from `link`) and `source_url` to the post's `link` — that is what marks
      the post as used. Run them through step 3 like every pick; they do not count toward the 30 and
      are not woven into the practice object.

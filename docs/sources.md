@@ -16,7 +16,7 @@ source never breaks the run.
 ## Chinese
 | Source | Where | Auth | Status |
 |---|---|---|---|
-| HSK list | `drkameleon/complete-hsk-vocabulary` raw JSON, per level | none | ✅ progression backbone; each word → `readings` (see below) |
+| HSK list | `drkameleon/complete-hsk-vocabulary` raw JSON, per level, `exclusive/newest` = HSK syllabus of November 2025 (since 2026-11-13; before that `new` = 2021 list) | none | ✅ progression backbone; each word → `readings` (see below). This copy tags only words the repo already had, so it is ~840 words short of the syllabus (10,057 vs 10,898 in `bezlant/hsk-3-vocabulary`), mostly in the 7–9 band |
 | Tatoeba | `content/data/tatoeba_cmn.tsv`, up to 30 characters; 3 sentences on each `candidates.hsk` word | none | ✅ |
 | CC-CEDICT | `content/data/cedict.txt.gz`; `check zh` prints each pick's readings as `dictionary` | none | ✅ pinyin check, extra words |
 

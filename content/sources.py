@@ -126,8 +126,9 @@ def youtube_channels(per_channel: int = 1):
 
 # --- Chinese -----------------------------------------------------------------
 
+# "newest" = the HSK syllabus of November 2025 (level 1 is 300 words); "new" was the 2021 list.
 HSK_RAW = ("https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary"
-           "/main/wordlists/exclusive/new/{level}.json")
+           "/main/wordlists/exclusive/newest/{level}.json")
 _hsk_cache: dict[int, list] = {}
 
 # Dictionary noise for a learner card: surnames, cross-references, archaic/regional-only senses.
