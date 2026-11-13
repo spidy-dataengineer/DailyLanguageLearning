@@ -7,6 +7,8 @@ Since 2026-11-10 the cards' source is the quiz app's database (Supabase): `write
 then a Notion backup page (`db/cards_db.py`). Each new card carries its three wrong options for the app
 (step 4 of the prompt), and step 6 fills the cards that still have none; the rules are in `docs/options.md`.
 A refused option leaves the card saved without it, and the next run offers it again.
+The Korean sentences follow `docs/translation.md`, and step 4 re-reads them against it before `write`
+(added 2026-11-13: of 188 cards written over two days, 58 had literal or awkward Korean).
 
 ## Volume
 `TARGETS = {"en": 30, "zh": 30}` in `constants.py` → 60/day total (Chinese raised from 10 on 2026-11-10,

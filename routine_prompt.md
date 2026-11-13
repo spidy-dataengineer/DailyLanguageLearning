@@ -166,6 +166,10 @@ Then run `python daily_notion.py check-db`. It reads one card id from the databa
 4. Expand the kept picks into the item objects and write the arrays to `en_items.json` and
    `zh_items.json` in the repo (UTF-8). Each card also gets its three **wrong options** for the quiz app
    (`options` in the schema below): read `docs/options.md` first and follow its rules.
+   **Korean translations:** read `docs/translation.md` before writing `example_ko`, `example2_ko` and the
+   practice `ko`. After both files are written, re-read every Korean sentence against it and rewrite any that
+   breaks a rule — in particular search the files for `—`, `–`, `―`, `(`, `:` and `당신` and fix each hit the
+   rules do not allow. Say in your summary how many sentences you rewrote at this check.
 
 5. Run: `python daily_notion.py write en_items.json zh_items.json`
    It adds each card to the database, makes its Notion backup page, marks processed inbox items, and posts
