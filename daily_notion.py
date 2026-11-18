@@ -4,6 +4,7 @@ Modes:
   python daily_notion.py init <en_page_id> <zh_page_id> [inbox_page_id]   # create the 3 databases
   python daily_notion.py fetch <en|zh>                                    # gather raw material -> JSON on stdout
   python daily_notion.py check <en|zh> <candidates.json>                  # which candidates are already saved
+  python daily_notion.py lint <en_items.json> <zh_items.json>             # write's checks (docs/card-quality.md), no writing
   python daily_notion.py write <en_items.json> <zh_items.json>            # cards to the database, Notion backup + notify
   python daily_notion.py missing-options <en|zh> <n>                      # cards with no written wrong options yet
   python daily_notion.py add-options <options.json>                       # check + write wrong options to the database
@@ -33,7 +34,7 @@ import sys
 
 from constants import REQUIRED_ENV
 from db import cards_db
-from notion.notion_io import add_options, check, fetch, init, migrate, missing_options, write
+from notion.notion_io import add_options, check, fetch, init, lint, migrate, missing_options, write
 from srs.review import review
 from srs.stats import stats
 
@@ -93,6 +94,8 @@ def main(argv) -> None:
         review()
     elif cmd == "stats":
         stats()
+    elif cmd == "lint":
+        lint(argv[2] if len(argv) > 2 else None, argv[3] if len(argv) > 3 else None)
     elif cmd == "write":
         write(argv[2] if len(argv) > 2 else None, argv[3] if len(argv) > 3 else None)
     else:

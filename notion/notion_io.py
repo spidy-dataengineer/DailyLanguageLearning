@@ -25,7 +25,8 @@ from content import sources
 from constants import (EN_SOURCES, MAX_HSK_LEVEL, SNS_DAYS, SNS_EN_DB_ID, SNS_TEXT_MAX, SNS_ZH_DB_ID, STYLES,
                        TARGETS, ZH_SOURCES, kst_today, period_labels)
 from content.dedup import similar_to_any
-from content.options_check import check_options
+from content.card_check import check_card
+from content.options_check import check_options, option_key
 from db import cards_db
 from notify.notify import notify_write
 
@@ -418,6 +419,7 @@ def write(en_file, zh_file) -> None:
     today = kst_today()
     written = {"en": [], "zh": []}
     skipped, db_failed, backup_pending, options_refused, options_warnings = [], [], [], [], []
+    cards_refused = []
     processed_inbox = []
     for lang, path, db_env in [("en", en_file, "NOTION_DB_ID_EN"), ("zh", zh_file, "NOTION_DB_ID_ZH")]:
         if not path or not os.path.exists(path):
@@ -426,6 +428,7 @@ def write(en_file, zh_file) -> None:
             items = json.load(f)
         ds = data_source_id(notion, os.environ[db_env])
         seen = [r["expression"] for r in cards_db.saved_rows(lang) if r["expression"]]
+        used = cards_db.option_uses(lang)
         for item in items:
             if item.get("type") == "practice":
                 _write_practice(notion, ds, item.get("sentences") or [])
@@ -436,13 +439,20 @@ def write(en_file, zh_file) -> None:
             if similar_to_any(expr, seen):
                 skipped.append(f"{lang}: {expr}")
                 continue
+            problem = check_card({**item, "expression": expr}, lang)
+            if problem:
+                cards_refused.append(f"{lang}: {problem}")
+                continue
             options = item.get("options")
             if options is not None:
-                problem, warnings = check_options({**item, "expression": expr}, options)
+                problem, warnings = check_options({**item, "expression": expr}, options, used, lang)
                 options_warnings += warnings
                 if problem:
                     options_refused.append(problem)
                     options = None
+                else:
+                    for e, _ in options:
+                        used[option_key(e)] = used.get(option_key(e), 0) + 1
             audio = (native_audio_url(expr, item.get("pronunciation")) or youglish_url(expr, lang)) if lang == "zh" else None
             try:
                 card_id = cards_db.insert_card(cards_db.card_row(item, lang, options, audio, today))
@@ -467,9 +477,34 @@ def write(en_file, zh_file) -> None:
     if skipped:
         _log(f"skipped {len(skipped)} similar/duplicate: {skipped}")
     print(json.dumps({"written_en": len(written["en"]), "written_zh": len(written["zh"]), "skipped": skipped,
+                      "cards_refused": cards_refused,
                       "db_failed": db_failed, "backup_pending": backup_pending,
                       "options_refused": options_refused, "options_warnings": options_warnings},
                      ensure_ascii=False, indent=2))
+
+
+def lint(en_file, zh_file) -> None:
+    """The checks `write` makes (docs/card-quality.md), without writing, so the routine can fix cards first."""
+    out = {"cards_refused": [], "options_refused": [], "options_warnings": []}
+    for lang, path in [("en", en_file), ("zh", zh_file)]:
+        if not path or not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            items = [i for i in json.load(f) if i.get("type") != "practice"]
+        used = cards_db.option_uses(lang)
+        for item in items:
+            problem = check_card(item, lang)
+            if problem:
+                out["cards_refused"].append(f"{lang}: {problem}")
+            if item.get("options") is not None:
+                problem, warnings = check_options(item, item["options"], used, lang)
+                out["options_warnings"] += warnings
+                if problem:
+                    out["options_refused"].append(problem)
+                else:
+                    for e, _ in item["options"]:
+                        used[option_key(e)] = used.get(option_key(e), 0) + 1
+    print(json.dumps(out, ensure_ascii=False, indent=2))
 
 
 # --- wrong options for cards that have none (docs/options.md) ----------------
@@ -486,18 +521,21 @@ def add_options(path: str) -> None:
     with open(path, encoding="utf-8") as f:
         entries = json.load(f)
     cards = cards_db.cards_by_id([e["id"] for e in entries if e.get("id")])
+    used = {lang: cards_db.option_uses(lang) for lang in {c["lang"] for c in cards.values()}}
     added, refused, warnings = 0, [], []
     for e in entries:
         card = cards.get(e.get("id"))
         if not card or card["expression"] != e.get("expression"):
             refused.append(f"{e.get('expression')}: 카드가 없거나 표현이 바뀜")
             continue
-        problem, warns = check_options(card, e.get("options"))
+        problem, warns = check_options(card, e.get("options"), used[card["lang"]], card["lang"])
         warnings += warns
         if problem:
             refused.append(problem)
         elif cards_db.set_options(card["id"], card["expression"], e["options"]):
             added += 1
+            for o, _ in e["options"]:
+                used[card["lang"]][option_key(o)] = used[card["lang"]].get(option_key(o), 0) + 1
         else:
             refused.append(f"{card['expression']}: 쓰는 사이 표현이 바뀜")
     print(json.dumps({"added": added, "refused": refused, "warnings": warnings}, ensure_ascii=False, indent=2))

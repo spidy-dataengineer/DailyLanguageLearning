@@ -165,18 +165,25 @@ Then run `python daily_notion.py check-db`. It reads one card id from the databa
    Your picks must also not repeat each other — `check` flags repeats inside the list as `duplicates`.
 
 4. Expand the kept picks into the item objects and write the arrays to `en_items.json` and
-   `zh_items.json` in the repo (UTF-8). Each card also gets its three **wrong options** for the quiz app
+   `zh_items.json` in the repo (UTF-8). **Read `docs/card-quality.md` first**: every card must meet its rules —
+   no editing notes or field labels (`원래 예문`, `EN:`, `노트:`) in `usage_note`, no dash in `example`, an example
+   of 3 to 30 words (Chinese: characters) made of words at or below the card's level, a meaning that matches how the
+   example uses the expression, and Chinese `pronunciation` with its light tones (朋友 `péng you`). Each card also gets its three **wrong options** for the quiz app
    (`options` in the schema below): read `docs/options.md` first and follow its rules.
    **Korean translations:** read `docs/translation.md` before writing `example_ko`, `example2_ko` and the
    practice `ko`. After both files are written, re-read every Korean sentence against it and rewrite any that
    breaks a rule — in particular search the files for `—`, `–`, `―`, `(`, `:` and `당신` and fix each hit the
    rules do not allow. Say in your summary how many sentences you rewrote at this check.
+   Then run `python daily_notion.py lint en_items.json zh_items.json`. Fix every card under `cards_refused` and
+   `options_refused` (an option already used on too many cards: pick another of the same topic) and run it again
+   until both are empty. `write` refuses the same cards.
 
 5. Run: `python daily_notion.py write en_items.json zh_items.json`
    It adds each card to the database, makes its Notion backup page, marks processed inbox items, and posts
    the Discord summary. Report its output, including these lists when they are not empty:
    - `db_failed` — the database refused these cards, so they were not saved anywhere. Name them.
    - `backup_pending` — saved, but the Notion page failed; the app's daily job makes it. Just report.
+   - `cards_refused` — the card broke a rule of `docs/card-quality.md` and was not saved. Name them.
    - `options_refused` — the card was saved without options; step 6 offers it again.
 
 6. **Wrong options for cards that still have none** (earlier cards, and any refused in step 5). For `en`,

@@ -16,6 +16,7 @@ Notion DBs** → **Discord** ping. Design docs (living source of truth): **start
 | Discord notifications | `notify/notify.py` (`notify_write`, `notify_review`, `notify_stats`) | `docs/notify.md` · `notify/PRINCIPLES.md` |
 | Shared constants | `constants.py` (STYLES, TARGETS, SIM_THRESHOLD, INTERVALS, …) — repo root | — |
 | Content policy (level/genre/count/pronunciation) | `routine_prompt.md`, `TARGETS` | `docs/generation.md` |
+| Card quality rules + the checks before writing | `content/card_check.py`, `content/options_check.py` (`lint`) | `docs/card-quality.md` · `docs/options.md` |
 | Scheduling / deployment | — | `docs/deployment.md` |
 
 Code is grouped into **concern folders** — `notion/` (Notion gateway), `content/` (sources + dedup),
@@ -35,7 +36,8 @@ overview; this file stays the index.
 - Secrets + DB IDs live in `.env` (gitignored) — never commit; never print the token/webhook value.
 - Notion uses the **2025-09-03 data-source model** (notion-client 3.1.0): `data_sources.query`,
   `pages.create(parent=data_source_id)`; resolve via `data_source_id(db_id)`.
-- CLI: `python daily_notion.py init <en_page> <zh_page> [inbox_page] | migrate | review | stats | check-env | fetch <en|zh> | write <en.json> <zh.json>`.
+- CLI: `python daily_notion.py init <en_page> <zh_page> [inbox_page] | migrate | review | stats | check-env | fetch <en|zh> | lint <en.json> <zh.json> | write <en.json> <zh.json>`.
+- **Card quality (2026-11-17 user decision): every rule found in a quality review goes into `docs/card-quality.md`, and new cards are generated under it.** A rule a script can test also goes into `content/card_check.py` / `options_check.py`.
 
 ## Workflow discipline
 On every change that adds, edits, or deletes files, follow this loop:

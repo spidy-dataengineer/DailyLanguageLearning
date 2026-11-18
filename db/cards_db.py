@@ -14,6 +14,7 @@ import os
 import requests
 
 from constants import STYLES, SUPABASE_URL
+from content.options_check import option_key
 
 PAGE = 1000
 TIMEOUT = 30
@@ -106,11 +107,21 @@ def missing_options(lang: str, n: int) -> list[dict]:
     return r.json()
 
 
+def option_uses(lang: str) -> dict[str, int]:
+    """How many cards of the language each written wrong option is on, by `option_key` (docs/card-quality.md 오답-08)."""
+    counts: dict[str, int] = {}
+    for r in _get_all("cards", {"select": "options", "lang": f"eq.{lang}", "options": "not.is.null",
+                                "archived_at": "is.null", "order": "id"}):
+        for expression, _ in r["options"]:
+            counts[option_key(expression)] = counts.get(option_key(expression), 0) + 1
+    return counts
+
+
 def cards_by_id(ids: list[str]) -> dict[str, dict]:
     if not ids:
         return {}
     r = requests.get(_url("cards"), headers=_headers(), timeout=TIMEOUT, params={
-        "select": "id,expression,meaning_ko,example", "id": f"in.({','.join(ids)})"})
+        "select": "id,lang,expression,meaning_ko,example", "id": f"in.({','.join(ids)})"})
     r.raise_for_status()
     return {c["id"]: c for c in r.json()}
 

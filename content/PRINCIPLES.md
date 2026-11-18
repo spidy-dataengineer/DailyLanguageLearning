@@ -10,4 +10,8 @@
 - Each HSK word → `readings` (`_readings`): junk dictionary entries dropped **unless** that leaves
   nothing (北京, 好玩儿), same-pinyin entries merged. Picking which readings to teach stays the routine's call.
 
-Detail → [../docs/sources.md](../docs/sources.md) · [../docs/dedup.md](../docs/dedup.md)
+- `card_check.py` + `options_check.py` test a card and its wrong options against `docs/card-quality.md` before
+  `notion_io.write` / `add_options` / `lint` let them into the database. Only rules a script can test live here;
+  the judgment rules are the routine-Claude's. `options_check` counts option reuse from `db.cards_db.option_uses`.
+
+Detail → [../docs/sources.md](../docs/sources.md) · [../docs/dedup.md](../docs/dedup.md) · [../docs/card-quality.md](../docs/card-quality.md)
