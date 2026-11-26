@@ -8,6 +8,8 @@ Modes:
   python daily_notion.py write <en_items.json> <zh_items.json>            # cards to the database, Notion backup + notify
   python daily_notion.py missing-options <en|zh> <n>                      # cards with no written wrong options yet
   python daily_notion.py add-options <options.json>                       # check + write wrong options to the database
+  python daily_notion.py flagged                                          # cards the daily review failed (last 3 days)
+  python daily_notion.py fix-cards <fixes.json> [--dry-run]               # check + rewrite fields of saved cards
   python daily_notion.py review                                           # SRS: surface due cards, reschedule
   python daily_notion.py stats                                            # read-only aggregates -> JSON + Discord
   python daily_notion.py migrate                                          # ensure SRS properties on existing DBs
@@ -34,7 +36,7 @@ import sys
 
 from constants import REQUIRED_ENV
 from db import cards_db
-from notion.notion_io import add_options, check, fetch, init, lint, migrate, missing_options, write
+from notion.notion_io import add_options, check, fetch, fix_cards, flagged, init, lint, migrate, missing_options, write
 from srs.review import review
 from srs.stats import stats
 
@@ -88,6 +90,12 @@ def main(argv) -> None:
         if len(argv) < 3:
             raise SystemExit("usage: daily_notion.py add-options <options.json>")
         add_options(argv[2])
+    elif cmd == "flagged":
+        flagged()
+    elif cmd == "fix-cards":
+        if len(argv) < 3:
+            raise SystemExit("usage: daily_notion.py fix-cards <fixes.json> [--dry-run]")
+        fix_cards(argv[2], "--dry-run" in argv[3:])
     elif cmd == "migrate":
         migrate()
     elif cmd == "review":

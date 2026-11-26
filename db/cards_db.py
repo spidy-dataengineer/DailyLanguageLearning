@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import datetime as dt
 import os
+import re
 
 import requests
 
@@ -18,6 +19,9 @@ from content.options_check import option_key
 
 PAGE = 1000
 TIMEOUT = 30
+# What the morning job may rewrite on a saved card the daily review failed (fix-cards). The expression, level and
+# style stay: learners' progress and the level mix hang on them.
+FIX_FIELDS = ("meaning_ko", "example", "example_ko", "example2", "example2_ko", "usage_note", "options", "content_flag")
 
 
 def _headers(prefer: str | None = None) -> dict:
@@ -131,5 +135,42 @@ def set_options(card_id: str, expression: str, options: list) -> bool:
     r = requests.patch(_url("cards"), headers=_headers("return=representation"), timeout=TIMEOUT,
                        params={"id": f"eq.{card_id}", "expression": f"eq.{expression}", "select": "id"},
                        json={"options": options})
+    r.raise_for_status()
+    return bool(r.json())
+
+
+def _when(stamp: str) -> dt.datetime:
+    """A database timestamp. Python 3.9 reads only 3 or 6 digits after the second."""
+    stamp = re.sub(r"\.(\d+)", lambda m: "." + m.group(1)[:6].ljust(6, "0"), stamp.replace("Z", "+00:00"))
+    return dt.datetime.fromisoformat(stamp)
+
+
+def cards_full(ids: list[str]) -> dict[str, dict]:
+    """The cards in use with every field fix-cards may change, by id."""
+    if not ids:
+        return {}
+    rows = _get_all("cards", {"select": "id,lang,level,style,expression,updated_at," + ",".join(FIX_FIELDS),
+                              "id": f"in.({','.join(ids)})", "archived_at": "is.null"})
+    return {c["id"]: c for c in rows}
+
+
+def flagged_cards(since: dt.datetime) -> list[dict]:
+    """Cards the daily review (card_reviews run `daily-YYYY-MM-DD`) failed since `since` and nobody changed after,
+    each with those fails."""
+    fails = _get_all("card_reviews", {"select": "card_id,rule,reason,reviewed_at", "run": "like.daily-*",
+                                      "verdict": "eq.fail", "reviewed_at": f"gte.{since.isoformat()}", "order": "id"})
+    cards = cards_full(sorted({f["card_id"] for f in fails}))
+    out: dict[str, dict] = {}
+    for f in fails:
+        card = cards.get(f["card_id"])
+        if card and _when(card["updated_at"]) < _when(f["reviewed_at"]):
+            out.setdefault(card["id"], {**card, "fails": []})["fails"].append({"rule": f["rule"], "reason": f["reason"]})
+    return list(out.values())
+
+
+def update_card(card_id: str, expression: str, change: dict) -> bool:
+    """Writes the changed fields if the card still has that expression; False when it changed meanwhile."""
+    r = requests.patch(_url("cards"), headers=_headers("return=representation"), timeout=TIMEOUT,
+                       params={"id": f"eq.{card_id}", "expression": f"eq.{expression}", "select": "id"}, json=change)
     r.raise_for_status()
     return bool(r.json())

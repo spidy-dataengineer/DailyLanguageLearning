@@ -541,6 +541,59 @@ def add_options(path: str) -> None:
     print(json.dumps({"added": added, "refused": refused, "warnings": warnings}, ensure_ascii=False, indent=2))
 
 
+# --- fixing cards the daily review failed (docs/card-quality.md) -------------
+
+def flagged(days: int = 3) -> None:
+    since = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=days)
+    print(json.dumps({"cards": cards_db.flagged_cards(since)}, ensure_ascii=False, indent=2))
+
+
+def fix_cards(path: str, dry_run: bool = False) -> None:
+    """Rewrites fields of saved cards ([{"id", "expression", <fields>}]) after the checks `write` makes, and prints
+    each change before and after. Only `cards_db.FIX_FIELDS` change here. `dry_run` checks and prints without
+    writing (the old-card fixes are proposed first and written only after the owner approves)."""
+    with open(path, encoding="utf-8") as f:
+        entries = json.load(f)
+    cards = cards_db.cards_full([e["id"] for e in entries if e.get("id")])
+    used = {lang: cards_db.option_uses(lang) for lang in {c["lang"] for c in cards.values()}}
+    fixed, refused, warnings = [], [], []
+    for e in entries:
+        name, card = e.get("expression"), cards.get(e.get("id"))
+        if not card or card["expression"] != name:
+            refused.append(f"{name}: 카드가 없거나 표현이 바뀜")
+            continue
+        others = sorted(set(e) - {"id", "expression"} - set(cards_db.FIX_FIELDS))
+        if others:
+            refused.append(f"{name}: 여기서 못 고치는 칸 ({', '.join(others)})")
+            continue
+        change = {k: e[k] for k in cards_db.FIX_FIELDS if k in e and e[k] != card[k]}
+        if not change:
+            refused.append(f"{name}: 바뀐 칸 없음")
+            continue
+        if change.get("content_flag", "vulgar") not in ("vulgar", "sexual", None):
+            refused.append(f"{name}: content_flag 는 vulgar, sexual, null 중 하나")
+            continue
+        lang, after = card["lang"], {**card, **change}
+        problem = check_card(after, lang)
+        if not problem and "options" in change:
+            # The card's own old options leave with this change, so they don't count against the new ones.
+            mine = [option_key(o) for o, _ in card["options"] or []]
+            for k in mine:
+                used[lang][k] -= 1
+            problem, warns = check_options(after, change["options"], used[lang], lang)
+            warnings += warns
+            for k in mine if problem else [option_key(o) for o, _ in change["options"]]:
+                used[lang][k] = used[lang].get(k, 0) + 1
+        if problem:
+            refused.append(problem)
+        elif dry_run or cards_db.update_card(card["id"], name, change):
+            fixed.append({"expression": name, "before": {k: card[k] for k in change}, "after": change})
+        else:
+            refused.append(f"{name}: 쓰는 사이 표현이 바뀜")
+    print(json.dumps({"dry_run": dry_run, "fixed": fixed, "refused": refused, "warnings": warnings},
+                     ensure_ascii=False, indent=2))
+
+
 # --- init / migrate ----------------------------------------------------------
 
 _SRS_PROPS = {

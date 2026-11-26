@@ -10,6 +10,7 @@
 ## 읽는 법
 
 - 방식: **기계** = 스크립트가 셈 (`content/card_check.py`, `content/options_check.py`, 앱 코드). **판단** = 카드 만드는 Claude 가 다시 읽고 확인, 검사 세션이 표본으로 확인
+- 매일 검사 (2026-11-24 사용자 "키자 허락할게"): 09:30 KST 검사 작업이 그날 새 카드의 판단 항목을 판정 (`card_reviews` run `daily-날짜`). 다음 날 아침 카드 작업이 `flagged` 로 걸린 카드를 받아 `fix-cards` 로 고침 (`routine_prompt.md` 7번). 표현·단계·분류는 여기서 안 바꿈
 - 거부: 쓰기 전 검사 (`python daily_notion.py lint`) 와 쓰기 (`write`, `add-options`) 가 받지 않음. 경고: 받되 보고
 - 지키는 곳: **생성** = 매일 카드 만들 때, **앱** = 앱이 문제 만들 때, **지금 카드** = 이미 있는 카드 고칠 목록 (DB 반영은 사용자 승인 뒤)
 
